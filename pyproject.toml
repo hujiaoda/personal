@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "personal-data-assistant"
+version = "0.1.0"
+description = "个人数据助手：个人记忆检索 + SQLite 智能问数 + 用户习惯记忆（DeepSeek + 手写核心机制）"
+requires-python = ">=3.10,<3.13"
+dependencies = []  # M0 不引入运行时依赖；M1 起按里程碑逐步添加 httpx/numpy/fastapi
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "integration: 需要真实 DeepSeek API 密钥的测试，默认不跑（后续里程碑使用）",
+]

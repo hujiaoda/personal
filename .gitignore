@@ -1,0 +1,22 @@
+# 密钥：任何情况下都不提交
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 本地数据（评测/演示数据除外，按 M2 再细化）
+data/*.db
+data/*.sqlite3
+*.db-journal
+
+# 编辑器
+.idea/
+.vscode/
