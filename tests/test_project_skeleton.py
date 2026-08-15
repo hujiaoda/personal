@@ -36,6 +36,12 @@ def test_readme_exists_and_describes_milestones():
     assert "SQLite" in text
 
 
+def test_readme_has_design_tradeoffs_section():
+    text = read_text("README.md")
+    assert "## 设计取舍" in text, "README 缺少设计取舍章节"
+    assert "function calling" in text, "README 设计取舍必须解释为何不用原生 function calling"
+
+
 def test_architecture_doc_has_required_sections():
     text = read_text("docs/architecture.md")
     for section in ["模块划分", "数据流", "目录安排", "评测方案", "降级与 B 计划"]:
@@ -49,10 +55,12 @@ def test_progress_has_three_required_records():
         assert field in text, f"PROGRESS.md 缺少: {field}"
 
 
-def test_pyproject_declares_python_and_pytest():
+def test_pyproject_declares_python_pytest_and_httpx():
     text = read_text("pyproject.toml")
     assert 'requires-python = ">=3.10' in text, "pyproject 未声明 Python >=3.10"
     assert "pytest" in text, "pyproject 未声明 pytest"
+    assert "httpx" in text, "pyproject 未声明 M1 的 httpx 依赖"
+    assert "integration" in text, "pyproject 未声明 integration 测试标记"
 
 
 def test_gitignore_keeps_secrets_and_cache_out():

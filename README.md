@@ -7,17 +7,18 @@
 ## 项目定位
 
 - 模型：DeepSeek API（OpenAI 兼容接口），密钥放环境变量。
-- 栈：Python 3.12 + SQLite + NumPy（手写余弦检索）+ FastAPI + pytest。
-- 约束：不用 LangChain，不用重量级框架，核心机制（工具循环、记忆、检索、
-  Text-to-SQL）全部手写。
+- 栈：Python 3.10+（开发机用 uv + Python 3.10）+ httpx + SQLite + NumPy
+  （手写余弦检索）+ FastAPI + pytest。
+- 约束：不用 LangChain、不用 openai SDK，不用重量级框架；核心机制（工具循环、
+  记忆、检索、Text-to-SQL）全部手写。
 - 可靠性：所有对外调用带超时、重试和降级，失败必须有 B 计划，不许崩溃。
 
 ## 当前进度
 
 | 里程碑 | 内容 | 状态 |
 | ------ | ---- | ---- |
-| M0 | 仓库骨架 + 架构设计文档 | 进行中 |
-| M1 | 核心循环：模型调用 → 工具执行 → 结果回填 → 循环 | 未开始 |
+| M0 | 仓库骨架 + 架构设计文档 | 已完成 |
+| M1 | 核心循环：模型调用 → 工具执行 → 结果回填 → 循环 | 已完成 |
 | M2 | 记忆系统：滑动窗口 + 分层摘要 + 长期记忆 + 检索 | 未开始 |
 | M3 | 智能问数：大白话 → 查表结构 → 写 SQL → 执行 → 自动修正 → 解释 | 未开始 |
 | M4 | 网页：FastAPI 接口 + 极简页面 | 未开始 |
@@ -28,27 +29,59 @@
 ```
 data-assistant/
 ├── docs/architecture.md   # 架构设计文档（模块、数据流、目录、评测）
-├── src/personal_data_assistant/  # 后续业务代码（M1 起填充）
+├── src/personal_data_assistant/
+│   ├── config.py          # M1 配置与默认值
+│   ├── llm/               # M1 手写 httpx 客户端 + JSON 动作协议提示词
+│   ├── core/loop.py       # M1 工具调用循环状态机
+│   └── tools/             # M1 工具协议 + 注册表
 ├── tests/                 # pytest 测试（先写测试，再写实现）
 ├── data/                  # SQLite 数据、向量、样例数据
 ├── evals/                 # 评测题集与评测脚本（M5）
-├── pyproject.toml         # Python 3.12 工程配置
+├── pyproject.toml         # Python >=3.10,<3.13 工程配置
 ├── PROGRESS.md            # 每步的进度、坑、复现要点
 └── .env.example           # 环境变量模板（复制为 .env 使用）
 ```
 
-## 快速开始（M0 只验证骨架）
+## 快速开始
 
 ```bash
 cd /home/hujiao/projects/data-assistant
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e '.[dev]'
+uv venv --python 3.10 .venv
+uv pip install --python .venv/bin/python -e '.[dev]'
 cp .env.example .env   # 填入 DEEPSEEK_API_KEY
-pytest
+# 本机有 ROS 注入 PYTHONPATH，测试必须清空它，否则 pytest 会加载 ROS 插件报错：
+PYTHONPATH= .venv/bin/python -m pytest
 ```
 
-M0 没有业务代码，`pytest` 只验证仓库契约：目录、文档、配置是否齐全。
+默认不跑真实 DeepSeek（integration 标记被排除）。确认 `.env` 已配置密钥后，
+可以显式冒烟：`PYTHONPATH= .venv/bin/python -m pytest -m integration`。
+
+## 设计取舍
+
+### 为什么不用原生 function calling，两者区别
+
+| 维度 | 原生 function calling（OpenAI tools 参数） | 本项目 JSON 动作协议 |
+| ---- | ------------------------------------------- | -------------------- |
+| 协议位置 | 请求体带 `tools`/`tool_choice`，响应带 `tool_calls`、`tool_call_id` | 工具 JSON Schema 写进 system prompt，模型输出 `{"action":"tool","tool":...,"args":...}` |
+| 回填方式 | 必须用 `role=tool` 并按 `tool_call_id` 配对 | 用 `role=user` 回填 `{"tool_result":...}`，任何聊天模型都接受 |
+| 可观测性 | 调用意图藏在 SDK/响应字段里，调试要翻请求日志 | 模型原话就是动作 JSON，轨迹一眼可读、可直接 mock |
+| 可降级性 | 模型/服务不支持 function calling 时整条路断掉 | 不支持 function calling 的文本模型也能照常走通 |
+| 失败恢复 | 格式错误通常由服务端/SDK 报错，难把错误回填给模型 | 解析失败、未知工具、参数错误都作为消息回填，模型可自行修正 |
+| 可控性 | 工具 schema 与提示词由 SDK 混合编码 | 提示词、schema、解析、执行全在自己代码里，评测可逐段覆盖 |
+| 成本 | 工具定义放在请求参数，通常不进计费 prompt | 工具 JSON Schema 占 prompt token，工具多时会变长 |
+| 并行调用 | 部分服务端支持一次返回多个 tool_calls | M1 约定一次一个工具，换取简单稳定；后续需要再扩展 |
+
+选择 JSON 动作协议的理由：本项目要“可观测、可 mock、可降级、不绑定 SDK”，
+而不是追求最小 prompt 开销。M1 先锁住单工具调用；若 M3 问数暴露出并行查多表的
+真实收益，再在协议里加批量动作，解析器与轨迹结构同步升级。
+
+### 为什么手写 httpx 而不是用 openai SDK
+
+openai SDK 在超时、重试、流式与 token 计量上都有自己的一层默认行为，出问题时
+很难定位是 SDK 还是服务端；本项目只需要 `POST /chat/completions` 一个端点，
+用 httpx 手写一个客户端模块就能同时拿到：连接/读取超时、指数退避重试、SSE 拆包、
+流失败自动降级非流式、usage 缺失时的粗估计量。协议只是 HTTP + JSON，
+不值得为它引入依赖和黑盒。
 
 ## 开发纪律（全程遵守）
 

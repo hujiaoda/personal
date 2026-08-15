@@ -1,9 +1,9 @@
 # Personal Data Assistant 架构设计文档
 
-- 版本：v0.1（M0）
-- 状态：待确认；确认后作为 M1~M5 的实现依据
-- 约束：Python 3.12；不用 LangChain 与重量级框架；模型走 DeepSeek API
-  （OpenAI 兼容）；核心机制全部手写
+- 版本：v0.1（M0，M1 评审时按环境决策修订）
+- 状态：已确认；作为 M1~M5 的实现依据
+- 约束：Python 3.10+（开发机 3.10.12 + uv；见 PROGRESS「环境决策」）；
+  不用 LangChain 与重量级框架；模型走 DeepSeek API（OpenAI 兼容）；核心机制全部手写
 
 ---
 
@@ -180,23 +180,23 @@ M0 现在就建好的部分标 ✅；其余为 M1~M5 计划位置。
 data-assistant/
 ├── README.md                         ✅ 项目说明、里程碑、纪律
 ├── PROGRESS.md                       ✅ 每步进度/坑/复现要点
-├── pyproject.toml                    ✅ Python 3.12 + pytest 工程配置
+├── pyproject.toml                    ✅ Python >=3.10,<3.13 + pytest 工程配置
 ├── .gitignore                        ✅ 忽略 .env、缓存、数据文件
 ├── .env.example                      ✅ 环境变量模板（不含真实密钥）
 ├── docs/
 │   └── architecture.md               ✅ 本架构文档
 ├── src/personal_data_assistant/
-│   ├── .gitkeep                      ✅ M0 占位（不写业务代码）
-│   ├── config.py                        M1
+│   ├── .gitkeep                      ✅ M0 占位（保留兼容 M0 契约）
+│   ├── config.py                     ✅ M1 配置与默认值
 │   ├── app.py                           M2 起装配入口
 │   ├── llm/
-│   │   ├── client.py                    M1 DeepSeek 客户端
-│   │   └── prompts.py                   M1 提示词模板
+│   │   ├── client.py                  ✅ M1 DeepSeek 客户端
+│   │   └── prompts.py                 ✅ M1 提示词模板
 │   ├── core/
-│   │   └── loop.py                      M1 工具循环状态机
+│   │   └── loop.py                    ✅ M1 工具循环状态机
 │   ├── tools/
-│   │   ├── base.py                      M1 工具协议
-│   │   ├── registry.py                  M1 注册表
+│   │   ├── base.py                    ✅ M1 工具协议
+│   │   ├── registry.py                ✅ M1 注册表
 │   │   ├── memory_tools.py              M2 记忆读写工具
 │   │   └── sql_tools.py                 M3 问数工具
 │   ├── memory/
@@ -216,8 +216,12 @@ data-assistant/
 │       └── static/index.html            M4 极简页面
 ├── tests/
 │   ├── test_project_skeleton.py      ✅ M0 仓库契约测试
-│   ├── test_llm_client.py               M1（fake HTTP）
-│   ├── test_core_loop.py                M1（脚本化 fake 模型）
+│   ├── test_config.py                 ✅ M1 配置契约
+│   ├── test_llm_client.py             ✅ M1（fake HTTP/SSE/重试/降级）
+│   ├── test_core_loop.py              ✅ M1（脚本化 fake 模型）
+│   ├── test_prompts.py                ✅ M1 协议提示词
+│   ├── test_tools.py                  ✅ M1 工具协议与注册表
+│   ├── test_integration_deepseek.py   ✅ M1 真实 API 冒烟（默认跳过）
 │   ├── test_memory_*.py                 M2
 │   ├── test_data_ask.py                 M3（固定 SQLite 测试库）
 │   ├── test_profile_habits.py           M3
@@ -241,9 +245,12 @@ data-assistant/
 
 ### 5.1 M1 核心循环
 
-- 工具协议手写 JSON：模型输出 `{"action":"tool_name","args":{...}}` 或
-  `{"action":"final","answer":"..."}`；自己解析，失败时重试并把解析错误回填。
-  不依赖框架的 function-calling 封装，保证可观测、可降级。
+- 工具协议手写 JSON：模型输出
+  `{"action":"tool","tool":"<工具名>","args":{...}}` 或
+  `{"action":"final","answer":"..."}`；工具清单以 JSON Schema 写进 system prompt，
+  自己解析，失败时把解析错误/未知工具/参数错误作为 user 消息回填模型重试。
+  不依赖框架的 function-calling 封装，保证可观测、可降级。回填工具结果也走
+  user 角色（`{"tool_result":...}`），不使用原生 `role=tool` + `tool_call_id`。
 - 最大轮数默认 6，SQL 修正子循环默认 3 轮；可配置。
 - 流式输出：优先 SSE 逐 token；若流式通道失败，自动降级为一次性返回完整结果。
 - 测试策略：用脚本化 fake 模型（预设响应队列）测试循环分支，真实 DeepSeek 调用
@@ -357,7 +364,9 @@ SQL 修正 3 轮、检索 top-k=8。全部集中在 `config.py`，评测可覆�
 - ADR-1：用 `httpx` 手写 OpenAI 兼容请求，不引入 openai SDK。理由：完全掌控
   超时、重试、流式与 token 计量；协议只是 HTTP + JSON，不值得为它引入依赖。
 - ADR-2：工具调用统一走“提示词约束的 JSON 动作协议”，不依赖 function-calling
-  封装。理由：可观测、可 mock、模型不支持 function calling 时也能降级。
+  封装。协议为 `{"action":"tool","tool":"<名>","args":{...}}` 与
+  `{"action":"final","answer":"..."}`，工具结果用 user 角色回填。理由：可观测、
+  可 mock、可把解析错误回填模型自纠、模型不支持 function calling 时也能降级。
 - ADR-3：向量存 SQLite BLOB + NumPy 余弦，不引入向量数据库。理由：规模小、
   满足手写检索要求、部署简单。
 - ADR-4：用户小数据库只读 + SQL 白名单。理由：个人记账数据不可被模型幻觉
