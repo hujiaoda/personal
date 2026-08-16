@@ -7,8 +7,8 @@
 ## 项目定位
 
 - 模型：DeepSeek API（OpenAI 兼容接口），密钥放环境变量。
-- 栈：Python 3.10+（开发机用 uv + Python 3.10）+ httpx + SQLite + pytest；
-  M4 再引入 FastAPI。长期记忆检索手写时间衰减，不依赖向量库。
+- 栈：Python 3.10+（开发机用 uv + Python 3.10）+ httpx + SQLite + FastAPI +
+  pytest。长期记忆检索手写时间衰减，不依赖向量库；前端单文件原生实现，无构建工具链。
 - 约束：不用 LangChain、不用 openai SDK，不用重量级框架；核心机制（工具循环、
   记忆、检索、Text-to-SQL）全部手写。
 - 可靠性：所有对外调用带超时、重试和降级，失败必须有 B 计划，不许崩溃。
@@ -21,7 +21,7 @@
 | M1 | 核心循环：模型调用 → 工具执行 → 结果回填 → 循环 | 已完成 |
 | M2 | 记忆系统：滑动窗口 + 会话/日/周摘要 + SQLite + KV 时间衰减检索 + 四策略重放 | 已完成 |
 | M3 | 智能问数：大白话 → 查表结构 → 写 SQL → 只读执行 → 自动修正 → 中文解释 | 已完成 |
-| M4 | 网页：FastAPI 接口 + 极简页面 | 未开始 |
+| M4 | 网页：FastAPI 接口（/ask、/ask_sql、/health）+ SSE 流式 + 极简单页 | 已完成 |
 | M5 | 评测：50 道记忆问答 + 四种记忆策略对比 + SQL 准确率 + 完整 README | 未开始 |
 
 ## 目录速览
@@ -30,13 +30,14 @@
 data-assistant/
 ├── docs/architecture.md   # 架构设计文档（模块、数据流、目录、评测）
 ├── src/personal_data_assistant/
-│   ├── config.py          # M1/M2 配置与默认值（M2 增加记忆参数）
-│   ├── app.py             # M2 装配入口（记忆作为 core 外层组件）
+│   ├── config.py          # M1~M3 配置与默认值（记忆/问数参数）
+│   ├── app.py             # M2/M3 装配入口（记忆增强 + sql_query 工具 + 习惯改写）
 │   ├── llm/               # M1 手写 httpx 客户端 + JSON 动作协议提示词
-│   ├── core/loop.py       # M1 工具调用循环状态机
+│   ├── core/loop.py       # M1 工具调用循环状态机（含 on_chunk 流式）
 │   ├── memory/            # M2 窗口 / 分层摘要 / SQLite / 时间衰减检索
 │   ├── data/              # M3 只读 SQL / schema 探查 / 问数编排 / 演示数据
 │   ├── profile/           # M3 习惯别名（复用 KV 长期记忆）
+│   ├── api/               # M4 FastAPI 路由 / 统一错误 / SSE / 极简单页
 │   └── tools/             # M1 工具协议 + 注册表 + M3 sql_query
 ├── tests/                 # pytest 测试（先写测试，再写实现）
 ├── data/                  # SQLite 系统库、样例数据
@@ -57,6 +58,8 @@ cp .env.example .env   # 填入 DEEPSEEK_API_KEY
 PYTHONPATH= .venv/bin/python scripts/seed_user_tables.py
 # 本机有 ROS 注入 PYTHONPATH，测试必须清空它，否则 pytest 会加载 ROS 插件报错：
 PYTHONPATH= .venv/bin/python -m pytest
+# 启动 M4 网页（浏览器打开 http://127.0.0.1:8000）：
+PYTHONPATH= .venv/bin/python -m personal_data_assistant.api.main
 ```
 
 默认不跑真实 DeepSeek（integration 标记被排除）。确认 `.env` 已配置密钥后，
@@ -104,6 +107,18 @@ Text-to-SQL 最怕模型幻觉出一条 `DELETE`。本项目在 `data/sqlite.py`
 
 错误修正子循环不藏魔法：执行失败后把「失败 SQL + 真实错误」作为 user 消息回填给
 模型，最多重写 3 次；修正次数耗尽就返回“原因 + 试过的 SQL”，绝不假装成功。
+
+### 为什么 M4 前端只有一个 HTML，SSE 用 fetch 手写解析
+
+- 前端只有一个 `index.html`：原生 JS + 内嵌 CSS，没有 npm/打包器/框架，克隆仓库
+  即可运行，复现成本为零。
+- 流式接口是 POST（要带问题与 timeout），浏览器 `EventSource` 不支持 POST body；
+  所以用 `fetch` + `ReadableStream` 手写按 `\n\n` 拆 SSE 事件，逻辑不到 50 行。
+- `/ask` 的 `on_chunk` 会把工具调用 JSON 也吐出来，API 层的 `StreamActionFilter`
+  增量状态机把工具 JSON 折进 `tool` 事件（前端折叠展示），只把 `final.answer`
+  正文作为 `chunk` 事件渲染进聊天泡泡，避免用户看到半截 JSON。
+- 所有接口错误统一 `{"error":{"code","message","detail?"}}`；前端只处理这一种
+  错误形状，不写 if-else 特判。
 
 ### 为什么手写 httpx 而不是用 openai SDK
 

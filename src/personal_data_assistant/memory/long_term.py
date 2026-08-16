@@ -17,7 +17,9 @@ import math
 import os
 import re
 import sqlite3
+import threading
 from datetime import date, datetime, time, timezone
+from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Union
 
@@ -127,6 +129,54 @@ def _as_aware_utc(value: datetime) -> datetime:
     return value.astimezone(timezone.utc)
 
 
+def _synchronized(method: Any) -> Any:
+    """给数据库公开方法加同一把 RLock；M4 起连接允许跨线程，靠锁保证串行。"""
+
+    @wraps(method)
+    def wrapper(self: "MemoryDatabase", *args: Any, **kwargs: Any) -> Any:
+        with self._lock:
+            return method(self, *args, **kwargs)
+
+    return wrapper
+
+
+def _synchronize_methods(*names: str) -> Callable[[Any], Any]:
+    def decorate(cls: Any) -> Any:
+        for name in names:
+            attr = getattr(cls, name)
+            if isinstance(attr, property):
+                setattr(
+                    cls,
+                    name,
+                    property(
+                        _synchronized(attr.fget),
+                        attr.fset,
+                        attr.fdel,
+                        attr.__doc__,
+                    ),
+                )
+            else:
+                setattr(cls, name, _synchronized(attr))
+        return cls
+
+    return decorate
+
+
+@_synchronize_methods(
+    "schema_version",
+    "close",
+    "save_message",
+    "save_messages",
+    "load_messages",
+    "upsert_summary",
+    "get_summary",
+    "list_summaries",
+    "put_memory",
+    "get_memory",
+    "search_memories",
+    "list_memories",
+    "delete_memory",
+)
 class MemoryDatabase:
     """M2 记忆库：会话消息、分层摘要、KV 长期记忆全部落 SQLite。"""
 
@@ -142,7 +192,10 @@ class MemoryDatabase:
         if path_text != ":memory:":
             parent = Path(path_text).expanduser().resolve().parent
             parent.mkdir(parents=True, exist_ok=True)
-        self._conn = sqlite3.connect(path_text, timeout=5.0)
+        # check_same_thread=False + 公开方法锁：FastAPI 线程池会在不同线程复用同一个
+        # MemoryManager，SQLite 连接默认绑线程会让 /ask 在第二个请求就崩。
+        self._lock = threading.RLock()
+        self._conn = sqlite3.connect(path_text, timeout=5.0, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA busy_timeout = 5000")
         self._conn.executescript(_SCHEMA)

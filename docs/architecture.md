@@ -1,7 +1,7 @@
 # Personal Data Assistant 架构设计文档
 
-- 版本：v0.3（M3 评审修订：智能问数、SQL 三层安全闸、评测埋点、习惯别名定稿）
-- 状态：已确认；作为 M3~M5 的实现依据
+- 版本：v0.4（M4 评审修订：FastAPI 接口、SSE 流式、极简页面与 SQLite 线程安全定稿）
+- 状态：已确认；作为 M5 的实现依据
 - 约束：Python 3.10+（开发机 3.10.12 + uv；见 PROGRESS「环境决策」）；
   不用 LangChain 与重量级框架；模型走 DeepSeek API（OpenAI 兼容）；核心机制全部手写
 
@@ -228,9 +228,10 @@ data-assistant/
 │   │   ├── __init__.py                ✅ M3 包出口
 │   │   └── habits.py                  ✅ M3 习惯别名（复用 KV 记忆）
 │   └── api/
-│       ├── main.py                      M4 FastAPI 入口
-│       ├── routes.py                    M4 接口路由
-│       └── static/index.html            M4 极简页面
+│       ├── __init__.py                  ✅ M4 包出口
+│       ├── main.py                      ✅ M4 FastAPI 工厂/装配/健康检查
+│       ├── routes.py                    ✅ M4 接口路由/统一错误/SSE 过滤器
+│       └── static/index.html            ✅ M4 极简单页（原生 JS + 内嵌 CSS）
 ├── tests/
 │   ├── test_project_skeleton.py      ✅ M0 仓库契约测试
 │   ├── test_config.py                 ✅ M1 配置契约
@@ -252,7 +253,8 @@ data-assistant/
 │   ├── test_sql_tools.py              ✅ M3 工具注册 + core 接缝
 │   ├── test_profile_habits.py         ✅ M3 习惯别名 + app 改写接缝
 │   ├── test_integration_sql.py        ✅ M3 真实 API 冒烟（默认跳过）
-│   ├── test_api.py                      M4（TestClient）
+│   ├── test_api.py                     ✅ M4 路由/SSE/超时/统一错误（fake 模型）
+│   ├── test_frontend.py                ✅ M4 单页端到端契约
 │   └── test_evals.py                    M5
 ├── data/
 │   ├── .gitkeep                      ✅ 数据目录占位
@@ -319,13 +321,24 @@ data-assistant/
   value=标准说法、category=`sql_alias`、weight=置信度；改写时“长说法优先、高权重
   优先”，`app.ask` 先改写再注入记忆上下文，`learn_alias` 供后续纠正学习。
 
-### 5.4 M4 网页
+### 5.4 M4 网页（已实现）
 
-- FastAPI 只做薄壳：HTTP 请求 → 参数校验 → 调 `app` → 流式返回；业务逻辑不在
-  路由里写。
-- 极简单页：一个输入框 + 流式回答区 + 工具调用折叠展示；无登录、无账号体系。
-- 健康检查 `/health` 返回模型与数据库连通状态，失败也返回 200 + 状态字段，
-  方便排查而不是直接 500。
+- FastAPI 只做薄壳：`POST /ask` 走 `PersonalAssistant.ask`（习惯改写 → 记忆
+  增强 → core 循环），`POST /ask_sql` 走 `SqlAskService.ask`（习惯改写 →
+  `data.ask` 确定性问数 → 中文解释）；路由只做参数校验、超时包装和序列化。
+- 请求体带 `timeout`（秒，默认 60、上限 300）；超时/校验失败/404/模型不可用/
+  未知异常统一返回 `{"error":{"code","message","detail?"}}` 中文错误结构。
+- 流式选 SSE：POST + fetch 读流（EventSource 不支持 POST body）。`/ask` 用
+  core loop 的 `on_chunk` 逐块转发，并由 `StreamActionFilter` 把工具调用 JSON
+  折进 `tool` 事件、只把 `final.answer` 正文作为 `chunk` 事件；`/ask_sql` 是
+  确定性问数子流程，先拿到 `AskResult` 再按块输出答案与 SQL/行集元数据。
+- 极简单页：单个 `index.html` + 原生 JS + 内嵌 CSS；记忆问答/问数两个入口、
+  聊天泡泡、工具调用折叠、SSE 逐块渲染，不引入构建工具链。
+- 健康检查 `/health` 永远返回 200 + 组件状态（assistant/model/memory_db/
+  user_db）；模型真实连通性不在这里烧 token，由 `/ask` 请求时的超时/重试兜底。
+- M4 线程安全补丁：FastAPI 线程池会跨线程复用 `MemoryManager`，因此
+  `MemoryDatabase` 连接改为 `check_same_thread=False` + 公开方法统一 RLock；
+  接口不变，M1~M3 测试保持全绿。
 
 ---
 
@@ -396,7 +409,8 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
 3. M2：先写窗口/摘要/持久化/策略重放的样例库测试 → 实现 `memory` 各模块与 `app` 外层装配。
 4. M3：先写固定 SQLite 测试库的问数测试 → 实现 `data`、`tools.sql_tools`、
    `profile`（已完成；红阶段 6 个 collection error，终态 159 passed, 5 deselected）。
-5. M4：先写 FastAPI TestClient 测试 → 实现路由与极简页面。
+5. M4：先写 FastAPI TestClient 测试 → 实现路由与极简页面（已完成；红阶段
+   2 个 collection error，终态 172 passed, 5 deselected）。
 6. M5：先写题集校验与判分测试 → 跑评测 → 写完整 README。
 
 每个里程碑结束都更新 `PROGRESS.md` 并停下来汇报，等确认后再继续。
@@ -422,6 +436,10 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
 - ADR-7：问数别名不建独立 `user_aliases` 表，先复用 `kv_memories`
   （key=`sql_alias:*`、category=`sql_alias`、weight 当置信度）。理由：M3 别名
   数量少、查询简单，KV 已具备持久化与检索能力；未来画像字段多了再拆表，接口不变。
+- ADR-8：M4 前端不用任何构建工具链，SSE 通过 POST + fetch `ReadableStream`
+  手写解析；`/ask` 流式时在 API 层用增量状态机把工具调用 JSON 折进 `tool`
+  事件。理由：EventSource 不能带 POST body，引入 Node 工具链会破坏“极简 + 可
+  离线复现”的约束；折叠逻辑放 API 层，前端只消费三种稳定事件。
 
 ---
 

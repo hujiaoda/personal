@@ -379,3 +379,118 @@
 7. 更新 README（进度表/SQL 安全设计取舍/快速开始）、architecture.md（v0.3、
    5.3、目录标 ✅、ADR-7）、`.env.example`、`data/README.md`、
    `docs/reproduce/M3-sql.md`、本文件；停下汇报，等确认后再进 M4。
+
+---
+
+## M4 网页应用层（FastAPI + SSE + 极简前端 + SQLite 线程安全补丁）
+
+### 进度
+
+- 严格 TDD：先写 `tests/test_api.py`（TestClient + fake 模型）与
+  `tests/test_frontend.py`（单页端到端契约）；红阶段为 2 个 collection error
+  （fastapi 未安装，与 M1~M3 的红阶段形态一致）。
+- 工程配置：pyproject 新依赖 `fastapi>=0.115,<0.116` + `uvicorn>=0.30,<1`。
+  刻意不装最新 FastAPI 0.141/Starlette 1.6：其 TestClient 会打
+  `StarletteDeprecationWarning`，锁 0.115.x 后测试输出干净（0 warning）。
+- 新增实现（每个文件顶部都有中文取舍注释）：
+  - `api/routes.py`：三个接口 + 统一错误体系 + SSE 过滤器。
+    - `POST /ask`：走 `PersonalAssistant.ask`（习惯改写 → 记忆增强 → core 循环）；
+      非流式返回 answer/status/rounds/tool_rounds/usage；流式用
+      `on_chunk` 把 core loop 的增量接进 SSE。
+    - `POST /ask_sql`：走 `SqlAskService`（习惯改写 → `data.ask` 确定性问数
+      子流程），返回 answer/sql/columns/rows/alias_applied/usage。
+    - `GET /health`：永远 200 + assistant/model/memory_db/user_db 组件状态。
+    - 请求体统一带 `timeout`（默认 60s、上限 300s）；超时用「守护线程 + 队列
+      deadline」实现，到点 504；校验 422、模型不可用 503、404、未知异常 500
+      全部收口成 `{"error":{"code","message","detail?"}}` 中文结构。
+    - `StreamActionFilter` 增量状态机（prefix/tool/final）：把工具调用 JSON 折成
+      `tool` 事件、只把 `final.answer` 正文解码成 `chunk` 事件；支持分块切断的
+      `\"`/`\n`/`\uXXXX` 转义与代理对。
+  - `api/main.py`：`create_app()` 工厂（测试注入 fake，生产读 Settings 自动装配）、
+    `SqlAskService`、`AskSqlOutcome`、`HealthChecker`、lifespan 关闭资源、
+    `python -m personal_data_assistant.api.main` 启动入口。
+  - `api/static/index.html`：单文件前端（原生 JS + 内嵌 CSS），两个入口按钮、
+    聊天泡泡、POST + fetch `ReadableStream` 手写 SSE 解析、工具调用折叠、
+    问数 SQL/结果表展示，零构建工具链。
+  - `memory/long_term.py` Web 线程安全补丁（M4 必需，但 M1~M3 接口与行为不变）：
+    FastAPI 线程池跨线程复用 MemoryManager，SQLite 连接改为
+    `check_same_thread=False`，公开方法用类装饰器统一加 RLock；
+    `schema_version` 是 property，装饰器要包 `fget` 而不是替换整个 property。
+- 文档：`docs/architecture.md` 修订 v0.4（5.4 定稿、目录标 ✅、开发顺序标 ✅、
+  ADR-8 新增）；README 更新 M4 状态/目录/快速开始/设计取舍；新增
+  `docs/reproduce/M4-web.md`（核心概念/数据流/复现步骤/自测 5 题/
+  面试预演 5 题）；`docs/reproduce/README.md` 更新为 M0~M4 已生成。
+- 测试结果：`PYTHONPATH= .venv/bin/python -m pytest` → **172 passed,
+  5 deselected**；`-m integration` 无密钥 → **5 skipped**（2 M1 + 2 M2 + 1 M3，
+  M4 全 fake 不新增 integration）。
+
+### 踩过的坑
+
+1. **SQLite 连接默认绑定创建线程，FastAPI 第二个请求就可能崩**：
+   `MemoryDatabase` 在装配线程建连接，请求被 anyio 线程池分到另一个线程后，
+   `list_memories()` 直接 `ProgrammingError: SQLite objects created in a thread
+   can only be used in that same thread`。不要想“把请求都绑回创建线程”，线程池
+   调度不保证；正确做法是连接 `check_same_thread=False` + 公开方法统一 RLock，
+   让并发请求串行进库。
+2. **给 `schema_version` 这个 property 加锁时，不能像普通方法一样包一层**：
+   `@property` 被 `setattr` 替换成函数后，`db.schema_version` 会返回函数对象，
+   测试断言 `== 1` 直接红；装饰器要先 `isinstance(attr, property)`，锁包在
+   `fget` 上再重建 property。
+3. **`EventSource` 只能 GET，不能带 POST body**：流式接口要传 question/timeout，
+   前端必须用 `fetch` + `response.body.getReader()`，按 `\n\n` 切块、逐行找
+   `data:` 再 `JSON.parse`。引 Node 构建工具链就违背“极简、可离线复现”。
+4. **`on_chunk` 会把工具调用 JSON 也吐给页面**：M1 为可观测性原样转发增量，
+   M4 若直接渲染，用户会先看到半截 `{"action":"tool"...`。`StreamActionFilter`
+   的 final 模式收尾时还会把 answer 后的 `"}"` 尾巴误报成 tool 事件——answer
+   闭合后直接清空缓冲区，别把协议尾巴继续喂给 prefix 状态。
+5. **FastAPI 最新版（0.141/Starlette 1.6）的 TestClient 有弃用告警**：
+   `Using httpx with starlette.testclient is deprecated`。锁
+   `fastapi>=0.115,<0.116` 后 warning 归零；依赖范围宁窄勿宽，复现环境才稳定。
+6. **守护线程 + 队列做请求超时，测试里的阻塞 fake 必须可放行**：超时只中断
+   HTTP 等待，后台守护线程还在跑；测试若用 `Event().wait()` 永久阻塞，pytest
+   进程结束可能被拖住。测试里先 `finally: model.release.set()` 再断言 504。
+   生产线程由 DeepSeek 客户端自己的连接/读取超时与重试自然回收。
+7. **`/ask_sql` 的流式是“结果分块”不是模型 token 流**：M3 的 `ask_database`
+   只依赖 `complete` 鸭子协议，没有 on_chunk。为守住“M4 不改 data 层”的边界，
+   `/ask_sql` 先确定性跑完问数，再把中文解释按块输出；真正的模型 token 流在
+   `/ask` 路径上。这个取舍写进文档，避免面试被问住。
+
+### 复现要点
+
+关掉代码后重写 M4，按这个顺序来：
+
+1. 读 `docs/architecture.md` 5.4/ADR-8 与 `docs/reproduce/M4-web.md`；确认
+   `PYTHONPATH= .venv/bin/python -m pytest` 是唯一测试命令。
+2. **先写 2 个测试文件**：
+   - `tests/test_api.py`：health（含 missing user_db degraded）、/ask 非流式、
+     /ask SSE（按块拼答案）、/ask SSE 工具折叠（tool 事件与 chunk 事件分离）、
+     /ask_sql 别名改写 + 中文解释、/ask_sql SSE + SQL 元数据、422 统一中文错误、
+     504 超时（BlockingModel + finally release）、503 模型不可用、404 统一错误；
+   - `tests/test_frontend.py`：GET `/` 断言 `个人数据助手`、`id="chat"`、
+     `id="question"`、`id="send"`、两个 `data-endpoint`、`fetch(`、`getReader`、
+     `"chunk"`/`"tool"`/`"done"`。
+3. 更新 pyproject 加 `fastapi>=0.115,<0.116` 与 `uvicorn>=0.30,<1`；先跑测试
+   看 **2 个 collection error（No module named 'fastapi'）**；再
+   `~/.local/bin/uv pip install --python .venv/bin/python -e '.[dev]'`。
+4. 按依赖实现：
+   - `api/routes.py`：请求模型 → `APIError`/`error_body` → 四个异常 handler →
+     `_run_with_timeout` → `_sse` → `StreamActionFilter` → `/ask` 与 `/ask_sql`
+     两个 SSE 生成器 → `build_router`；
+   - `api/main.py`：`SqlAskService`（先 habits.rewrite_question 再 ask_database）
+     → `HealthChecker` → `_build_default_stack` → `create_app` 工厂 → 静态挂载
+     → `__main__` 启动入口；
+   - `api/static/index.html`：先静态骨架，再接 fetch 流式解析；
+   - `memory/long_term.py`：`_synchronized`/`_synchronize_methods` 装饰器 +
+     `check_same_thread=False`；property 单独处理。
+5. 重点复现三个接缝：
+   - `/ask`：`on_chunk` 只送队列，分类在 `StreamActionFilter`，core loop 零改动；
+   - `/ask_sql`：`SqlAskService` 的改写顺序与 `app.ask` 一致，且不 import
+     core/llm，保持 api 薄壳；
+   - 错误结构：请求校验、404、业务 APIError、未知异常四个 handler 一个都不能少。
+6. 跑 `PYTHONPATH= .venv/bin/python -m pytest`，目标 **172 passed,
+   5 deselected**；再跑 `-m integration` 确认无密钥 **5 skipped**。
+7. 启动冒烟：`PYTHONPATH= .venv/bin/python -m personal_data_assistant.api.main`，
+   浏览器验证两个入口、流式渲染、工具折叠、`/health`。
+8. 更新 README、architecture.md（v0.4/5.4/目录标 ✅/ADR-8）、
+   `docs/reproduce/M4-web.md`、`docs/reproduce/README.md`、本文件；
+   停下汇报，等确认后再进 M5。
