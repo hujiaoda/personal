@@ -1,0 +1,3392 @@
+{
+  "meta": {
+    "dataset": "/home/hujiao/projects/data-assistant/evals/questions/memory_50.json",
+    "questions_total": 56,
+    "corpus_messages": 48,
+    "kv_memories": 8,
+    "now": "2025-08-24T12:00:00+00:00",
+    "answer_mode": "deterministic-context-oracle",
+    "pricing": {
+      "input_per_mtok": 2.0,
+      "output_per_mtok": 8.0,
+      "currency": "CNY"
+    },
+    "settings": {
+      "max_window_messages": 20,
+      "max_window_tokens": 8000,
+      "long_term_top_k": 8,
+      "decay_lambda": 0.05,
+      "summary_session_limit": 5,
+      "summary_daily_limit": 5,
+      "summary_weekly_limit": 3,
+      "now": "2025-08-24T12:00:00+00:00"
+    }
+  },
+  "questions_total": 56,
+  "strategies": {
+    "none": {
+      "hits": 0,
+      "points_hit": 0,
+      "points_total": 56,
+      "context_tokens": 0,
+      "prompt_tokens": 15369,
+      "completion_tokens": 1400,
+      "total_tokens": 16769,
+      "model_calls": 56,
+      "questions": 56,
+      "hit_rate": 0.0,
+      "point_coverage": 0.0,
+      "estimated_cost": 0.041938
+    },
+    "window": {
+      "hits": 18,
+      "points_hit": 18,
+      "points_total": 56,
+      "context_tokens": 21504,
+      "prompt_tokens": 38584,
+      "completion_tokens": 1348,
+      "total_tokens": 39932,
+      "model_calls": 56,
+      "questions": 56,
+      "hit_rate": 0.32142857142857145,
+      "point_coverage": 0.32142857142857145,
+      "estimated_cost": 0.087952
+    },
+    "window_summary": {
+      "hits": 40,
+      "points_hit": 40,
+      "points_total": 56,
+      "context_tokens": 329784,
+      "prompt_tokens": 346864,
+      "completion_tokens": 1307,
+      "total_tokens": 348171,
+      "model_calls": 56,
+      "questions": 56,
+      "hit_rate": 0.7142857142857143,
+      "point_coverage": 0.7142857142857143,
+      "estimated_cost": 0.704184
+    },
+    "full": {
+      "hits": 56,
+      "points_hit": 56,
+      "points_total": 56,
+      "context_tokens": 334751,
+      "prompt_tokens": 351840,
+      "completion_tokens": 1246,
+      "total_tokens": 353086,
+      "model_calls": 56,
+      "questions": 56,
+      "hit_rate": 1.0,
+      "point_coverage": 1.0,
+      "estimated_cost": 0.713648
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "m001",
+      "category": "recent",
+      "question": "我最近买的《SQL 反模式》花了多少钱，用什么支付？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 278,
+          "completion_tokens": 25,
+          "total_tokens": 303,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 692,
+          "completion_tokens": 20,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "《SQL 反模式》75 元，用当当支付。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6197,
+          "completion_tokens": 20,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "《SQL 反模式》75 元，用当当支付。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5962,
+          "prompt_tokens": 6271,
+          "completion_tokens": 20,
+          "total_tokens": 6291,
+          "loop_status": "final",
+          "answer": "《SQL 反模式》75 元，用当当支付。"
+        }
+      }
+    },
+    {
+      "question_id": "m002",
+      "category": "recent",
+      "question": "我 8 月 11 日复习装饰器练了什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 27,
+          "total_tokens": 717,
+          "loop_status": "final",
+          "answer": "8 月 11 日复习 Python 装饰器并手写计时器，学习 30 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 27,
+          "total_tokens": 6222,
+          "loop_status": "final",
+          "answer": "8 月 11 日复习 Python 装饰器并手写计时器，学习 30 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5935,
+          "prompt_tokens": 6241,
+          "completion_tokens": 27,
+          "total_tokens": 6268,
+          "loop_status": "final",
+          "answer": "8 月 11 日复习 Python 装饰器并手写计时器，学习 30 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m003",
+      "category": "recent",
+      "question": "我 8 月 12 日午餐吃了什么，花了多少钱？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 20,
+          "total_tokens": 709,
+          "loop_status": "final",
+          "answer": "午餐轻食沙拉 32 元，支付宝支付。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 20,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "午餐轻食沙拉 32 元，支付宝支付。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5960,
+          "prompt_tokens": 6264,
+          "completion_tokens": 20,
+          "total_tokens": 6284,
+          "loop_status": "final",
+          "answer": "午餐轻食沙拉 32 元，支付宝支付。"
+        }
+      }
+    },
+    {
+      "question_id": "m004",
+      "category": "recent",
+      "question": "我 8 月 13 日练习六级翻译的重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 24,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "8 月 13 日练习英语六级翻译，重点传统文化词。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 24,
+          "total_tokens": 6218,
+          "loop_status": "final",
+          "answer": "8 月 13 日练习英语六级翻译，重点传统文化词。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6031,
+          "prompt_tokens": 6336,
+          "completion_tokens": 24,
+          "total_tokens": 6360,
+          "loop_status": "final",
+          "answer": "8 月 13 日练习英语六级翻译，重点传统文化词。"
+        }
+      }
+    },
+    {
+      "question_id": "m005",
+      "category": "recent",
+      "question": "8 月 14 日下雨天我怎么回家的，花了多少钱？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 275,
+          "completion_tokens": 25,
+          "total_tokens": 300,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 20,
+          "total_tokens": 710,
+          "loop_status": "final",
+          "answer": "下雨打车回家，24.5 元，用滴滴。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 20,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "下雨打车回家，24.5 元，用滴滴。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5963,
+          "prompt_tokens": 6269,
+          "completion_tokens": 20,
+          "total_tokens": 6289,
+          "loop_status": "final",
+          "answer": "下雨打车回家，24.5 元，用滴滴。"
+        }
+      }
+    },
+    {
+      "question_id": "m006",
+      "category": "recent",
+      "question": "我 8 月 15 日做六级真题阅读成绩如何，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 692,
+          "completion_tokens": 22,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "英语六级真题阅读满分，学习 90 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6197,
+          "completion_tokens": 22,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "英语六级真题阅读满分，学习 90 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5938,
+          "prompt_tokens": 6246,
+          "completion_tokens": 22,
+          "total_tokens": 6268,
+          "loop_status": "final",
+          "answer": "英语六级真题阅读满分，学习 90 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m007",
+      "category": "recent",
+      "question": "我 8 月 16 日玩了什么，花了多少钱？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 19,
+          "total_tokens": 706,
+          "loop_status": "final",
+          "answer": "和朋友玩桌游局，花费 60 元。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 19,
+          "total_tokens": 6211,
+          "loop_status": "final",
+          "answer": "和朋友玩桌游局，花费 60 元。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5937,
+          "prompt_tokens": 6241,
+          "completion_tokens": 19,
+          "total_tokens": 6260,
+          "loop_status": "final",
+          "answer": "和朋友玩桌游局，花费 60 元。"
+        }
+      }
+    },
+    {
+      "question_id": "m008",
+      "category": "recent",
+      "question": "我 8 月 17 日做的 SQL 复盘重点是什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "SQL 问数项目复盘重点白名单安全，学习 60 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 25,
+          "total_tokens": 6221,
+          "loop_status": "final",
+          "answer": "SQL 问数项目复盘重点白名单安全，学习 60 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6057,
+          "prompt_tokens": 6365,
+          "completion_tokens": 25,
+          "total_tokens": 6390,
+          "loop_status": "final",
+          "answer": "SQL 问数项目复盘重点白名单安全，学习 60 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m009",
+      "category": "recent",
+      "question": "我 8 月 18 日早餐吃了什么，怎么付的钱？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 18,
+          "total_tokens": 707,
+          "loop_status": "final",
+          "answer": "早餐饭团 8 元，微信支付。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 18,
+          "total_tokens": 6212,
+          "loop_status": "final",
+          "answer": "早餐饭团 8 元，微信支付。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5985,
+          "prompt_tokens": 6290,
+          "completion_tokens": 18,
+          "total_tokens": 6308,
+          "loop_status": "final",
+          "answer": "早餐饭团 8 元，微信支付。"
+        }
+      }
+    },
+    {
+      "question_id": "m010",
+      "category": "recent",
+      "question": "我 8 月 19 日复习上下文管理器学了多久？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 25,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "复习上下文管理器 __enter__/__exit__，学习 45 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 25,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "复习上下文管理器 __enter__/__exit__，学习 45 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5935,
+          "prompt_tokens": 6239,
+          "completion_tokens": 25,
+          "total_tokens": 6264,
+          "loop_status": "final",
+          "answer": "复习上下文管理器 __enter__/__exit__，学习 45 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m011",
+      "category": "recent",
+      "question": "我 8 月 20 日口语模考表现怎么样？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 272,
+          "completion_tokens": 25,
+          "total_tokens": 297,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 686,
+          "completion_tokens": 23,
+          "total_tokens": 709,
+          "loop_status": "final",
+          "answer": "英语口语模考 30 分钟，流利度比上次提升。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6191,
+          "completion_tokens": 23,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "英语口语模考 30 分钟，流利度比上次提升。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6215,
+          "completion_tokens": 23,
+          "total_tokens": 6238,
+          "loop_status": "final",
+          "answer": "英语口语模考 30 分钟，流利度比上次提升。"
+        }
+      }
+    },
+    {
+      "question_id": "m012",
+      "category": "recent",
+      "question": "我最近看的《奥本海默》评分和短评是什么？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 275,
+          "completion_tokens": 25,
+          "total_tokens": 300,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 25,
+          "total_tokens": 715,
+          "loop_status": "final",
+          "answer": "《奥本海默》评分 8.9，短评：普罗米修斯的火。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 25,
+          "total_tokens": 6220,
+          "loop_status": "final",
+          "answer": "《奥本海默》评分 8.9，短评：普罗米修斯的火。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6010,
+          "prompt_tokens": 6316,
+          "completion_tokens": 25,
+          "total_tokens": 6341,
+          "loop_status": "final",
+          "answer": "《奥本海默》评分 8.9，短评：普罗米修斯的火。"
+        }
+      }
+    },
+    {
+      "question_id": "m013",
+      "category": "recent",
+      "question": "我 8 月房租交了多少，怎么付的？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 272,
+          "completion_tokens": 25,
+          "total_tokens": 297,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 686,
+          "completion_tokens": 18,
+          "total_tokens": 704,
+          "loop_status": "final",
+          "answer": "8 月房租 2400 元，银行转账。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6191,
+          "completion_tokens": 18,
+          "total_tokens": 6209,
+          "loop_status": "final",
+          "answer": "8 月房租 2400 元，银行转账。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5914,
+          "prompt_tokens": 6216,
+          "completion_tokens": 18,
+          "total_tokens": 6234,
+          "loop_status": "final",
+          "answer": "8 月房租 2400 元，银行转账。"
+        }
+      }
+    },
+    {
+      "question_id": "m014",
+      "category": "recent",
+      "question": "我 8 月 21 日复习的 SQLite 时间函数学了多久？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 275,
+          "completion_tokens": 25,
+          "total_tokens": 300,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 25,
+          "total_tokens": 715,
+          "loop_status": "final",
+          "answer": "复习 SQLite 时间函数 date/week 用法，学习 40 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 25,
+          "total_tokens": 6220,
+          "loop_status": "final",
+          "answer": "复习 SQLite 时间函数 date/week 用法，学习 40 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5960,
+          "prompt_tokens": 6266,
+          "completion_tokens": 25,
+          "total_tokens": 6291,
+          "loop_status": "final",
+          "answer": "复习 SQLite 时间函数 date/week 用法，学习 40 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m015",
+      "category": "recent",
+      "question": "我最近看的《你的名字。》评分和短评是什么？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 23,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "《你的名字。》评分 8.5，短评：黄昏之时。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 23,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "《你的名字。》评分 8.5，短评：黄昏之时。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5984,
+          "prompt_tokens": 6291,
+          "completion_tokens": 23,
+          "total_tokens": 6314,
+          "loop_status": "final",
+          "answer": "《你的名字。》评分 8.5，短评：黄昏之时。"
+        }
+      }
+    },
+    {
+      "question_id": "m016",
+      "category": "recent",
+      "question": "我 8 月 23 日复习 httpx 的重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 23,
+          "total_tokens": 710,
+          "loop_status": "final",
+          "answer": "复习 httpx 客户端重试机制，重点指数退避。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 23,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "复习 httpx 客户端重试机制，重点指数退避。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6031,
+          "prompt_tokens": 6335,
+          "completion_tokens": 23,
+          "total_tokens": 6358,
+          "loop_status": "final",
+          "answer": "复习 httpx 客户端重试机制，重点指数退避。"
+        }
+      }
+    },
+    {
+      "question_id": "m017",
+      "category": "recent",
+      "question": "我 8 月 23 日晚上吃了什么，花了多少钱？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 18,
+          "total_tokens": 707,
+          "loop_status": "final",
+          "answer": "晚餐烧烤 88 元，微信支付。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 18,
+          "total_tokens": 6212,
+          "loop_status": "final",
+          "answer": "晚餐烧烤 88 元，微信支付。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5960,
+          "prompt_tokens": 6264,
+          "completion_tokens": 18,
+          "total_tokens": 6282,
+          "loop_status": "final",
+          "answer": "晚餐烧烤 88 元，微信支付。"
+        }
+      }
+    },
+    {
+      "question_id": "m018",
+      "category": "recent",
+      "question": "我 8 月 24 日复盘里 SQL 和 Python 各学了多少分钟？",
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 23,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "本周 SQL 学习 140 分钟，Python 学习 125 分钟。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 23,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "本周 SQL 学习 140 分钟，Python 学习 125 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5938,
+          "prompt_tokens": 6246,
+          "completion_tokens": 23,
+          "total_tokens": 6269,
+          "loop_status": "final",
+          "answer": "本周 SQL 学习 140 分钟，Python 学习 125 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m019",
+      "category": "summary_only",
+      "question": "我 6 月 2 日学的装饰器包含哪些内容，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 29,
+          "total_tokens": 6225,
+          "loop_status": "final",
+          "answer": "Python 装饰器：闭包 + @wraps，练习手写计时器，学习 45 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5938,
+          "prompt_tokens": 6245,
+          "completion_tokens": 29,
+          "total_tokens": 6274,
+          "loop_status": "final",
+          "answer": "Python 装饰器：闭包 + @wraps，练习手写计时器，学习 45 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m020",
+      "category": "summary_only",
+      "question": "我 6 月 3 日学的 SQL 聚合重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 27,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "SQL SELECT 与聚合，重点 GROUP BY 执行顺序，学习 50 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6031,
+          "prompt_tokens": 6335,
+          "completion_tokens": 27,
+          "total_tokens": 6362,
+          "loop_status": "final",
+          "answer": "SQL SELECT 与聚合，重点 GROUP BY 执行顺序，学习 50 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m021",
+      "category": "summary_only",
+      "question": "我 6 月 5 日六级阅读错了几道，问题在哪？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 275,
+          "completion_tokens": 25,
+          "total_tokens": 300,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 25,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 21,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "六级阅读错 2 道，主要问题是长难句。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5938,
+          "prompt_tokens": 6244,
+          "completion_tokens": 21,
+          "total_tokens": 6265,
+          "loop_status": "final",
+          "answer": "六级阅读错 2 道，主要问题是长难句。"
+        }
+      }
+    },
+    {
+      "question_id": "m022",
+      "category": "summary_only",
+      "question": "我 6 月 7 日学的生成器核心概念是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 24,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "Python 生成器与 yield 的惰性求值，学习 60 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6009,
+          "prompt_tokens": 6313,
+          "completion_tokens": 24,
+          "total_tokens": 6337,
+          "loop_status": "final",
+          "answer": "Python 生成器与 yield 的惰性求值，学习 60 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m023",
+      "category": "summary_only",
+      "question": "我 6 月 9 日概率论刷题覆盖哪一章，刷了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 22,
+          "total_tokens": 6218,
+          "loop_status": "final",
+          "answer": "概率论刷题 80 分钟，覆盖期望值章节。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5957,
+          "prompt_tokens": 6264,
+          "completion_tokens": 22,
+          "total_tokens": 6286,
+          "loop_status": "final",
+          "answer": "概率论刷题 80 分钟，覆盖期望值章节。"
+        }
+      }
+    },
+    {
+      "question_id": "m024",
+      "category": "summary_only",
+      "question": "我 6 月 11 日 SQL JOIN 练习了多久，重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 25,
+          "total_tokens": 715,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 23,
+          "total_tokens": 6218,
+          "loop_status": "final",
+          "answer": "SQL JOIN 练习 55 分钟，重点内连接与外连接。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6031,
+          "prompt_tokens": 6338,
+          "completion_tokens": 23,
+          "total_tokens": 6361,
+          "loop_status": "final",
+          "answer": "SQL JOIN 练习 55 分钟，重点内连接与外连接。"
+        }
+      }
+    },
+    {
+      "question_id": "m025",
+      "category": "summary_only",
+      "question": "我 6 月 13 日学的 FastAPI 内容是什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 21,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "FastAPI 路由与依赖注入，学习 65 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5984,
+          "prompt_tokens": 6291,
+          "completion_tokens": 21,
+          "total_tokens": 6312,
+          "loop_status": "final",
+          "answer": "FastAPI 路由与依赖注入，学习 65 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m026",
+      "category": "summary_only",
+      "question": "我 6 月 15 日线性代数学了什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 271,
+          "completion_tokens": 25,
+          "total_tokens": 296,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 686,
+          "completion_tokens": 25,
+          "total_tokens": 711,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6191,
+          "completion_tokens": 19,
+          "total_tokens": 6210,
+          "loop_status": "final",
+          "answer": "线性代数特征值，学习 60 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6214,
+          "completion_tokens": 19,
+          "total_tokens": 6233,
+          "loop_status": "final",
+          "answer": "线性代数特征值，学习 60 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m027",
+      "category": "summary_only",
+      "question": "我 6 月 17 日口语跟读练了多久，重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 690,
+          "completion_tokens": 25,
+          "total_tokens": 715,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6195,
+          "completion_tokens": 22,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "英语口语跟读 25 分钟，重点是连读弱读。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6057,
+          "prompt_tokens": 6363,
+          "completion_tokens": 22,
+          "total_tokens": 6385,
+          "loop_status": "final",
+          "answer": "英语口语跟读 25 分钟，重点是连读弱读。"
+        }
+      }
+    },
+    {
+      "question_id": "m028",
+      "category": "summary_only",
+      "question": "我 6 月 19 日 pytest 学了什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 20,
+          "total_tokens": 6213,
+          "loop_status": "final",
+          "answer": "pytest fixture 作用域，学习 90 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6217,
+          "completion_tokens": 20,
+          "total_tokens": 6237,
+          "loop_status": "final",
+          "answer": "pytest fixture 作用域，学习 90 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m029",
+      "category": "summary_only",
+      "question": "我 6 月 21 日 SQLite 学了什么安全内容？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 22,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "SQLite 只读连接与白名单，学习 80 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6216,
+          "completion_tokens": 22,
+          "total_tokens": 6238,
+          "loop_status": "final",
+          "answer": "SQLite 只读连接与白名单，学习 80 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m030",
+      "category": "summary_only",
+      "question": "我 6 月 23 日窗口函数练了什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 271,
+          "completion_tokens": 25,
+          "total_tokens": 296,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 686,
+          "completion_tokens": 25,
+          "total_tokens": 711,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6191,
+          "completion_tokens": 25,
+          "total_tokens": 6216,
+          "loop_status": "final",
+          "answer": "SQL 窗口函数，练习 ROW_NUMBER 排名，学习 75 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6214,
+          "completion_tokens": 25,
+          "total_tokens": 6239,
+          "loop_status": "final",
+          "answer": "SQL 窗口函数，练习 ROW_NUMBER 排名，学习 75 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m031",
+      "category": "summary_only",
+      "question": "我 6 月 25 日读 httpx 源码的重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 26,
+          "total_tokens": 6219,
+          "loop_status": "final",
+          "answer": "阅读 httpx 源码，重点超时与重试实现，学习 50 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6057,
+          "prompt_tokens": 6361,
+          "completion_tokens": 26,
+          "total_tokens": 6387,
+          "loop_status": "final",
+          "answer": "阅读 httpx 源码，重点超时与重试实现，学习 50 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m032",
+      "category": "summary_only",
+      "question": "我 6 月 27 日学的类型标注内容是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 21,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "类型标注与 typing 模块，学习 55 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6033,
+          "prompt_tokens": 6337,
+          "completion_tokens": 21,
+          "total_tokens": 6358,
+          "loop_status": "final",
+          "answer": "类型标注与 typing 模块，学习 55 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m033",
+      "category": "summary_only",
+      "question": "我 6 月 29 日上下文管理器学了什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 22,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "上下文管理器的异常安全，学习 45 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5935,
+          "prompt_tokens": 6238,
+          "completion_tokens": 22,
+          "total_tokens": 6260,
+          "loop_status": "final",
+          "answer": "上下文管理器的异常安全，学习 45 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m034",
+      "category": "summary_only",
+      "question": "我 7 月 1 日递归 CTE 练了什么场景？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 272,
+          "completion_tokens": 25,
+          "total_tokens": 297,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 23,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "递归 CTE，练习组织树查询，学习 60 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6215,
+          "completion_tokens": 23,
+          "total_tokens": 6238,
+          "loop_status": "final",
+          "answer": "递归 CTE，练习组织树查询，学习 60 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m035",
+      "category": "summary_only",
+      "question": "我 7 月 3 日 SQLite 时间函数学了什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 25,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "SQLite 时间函数入门：date/week 用法，学习 40 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6216,
+          "completion_tokens": 25,
+          "total_tokens": 6241,
+          "loop_status": "final",
+          "answer": "SQLite 时间函数入门：date/week 用法，学习 40 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m036",
+      "category": "summary_only",
+      "question": "我 7 月 5 日概率论错题重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 272,
+          "completion_tokens": 25,
+          "total_tokens": 297,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 24,
+          "total_tokens": 6216,
+          "loop_status": "final",
+          "answer": "概率论错题本，重点条件概率，学习 70 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6054,
+          "prompt_tokens": 6357,
+          "completion_tokens": 24,
+          "total_tokens": 6381,
+          "loop_status": "final",
+          "answer": "概率论错题本，重点条件概率，学习 70 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m037",
+      "category": "summary_only",
+      "question": "我 7 月 7 日 FastAPI 学了什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 21,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "FastAPI 流式 SSE 的实现，学习 65 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6217,
+          "completion_tokens": 21,
+          "total_tokens": 6238,
+          "loop_status": "final",
+          "answer": "FastAPI 流式 SSE 的实现，学习 65 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m038",
+      "category": "summary_only",
+      "question": "我 7 月 9 日英语六级听力弱项是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 22,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "英语六级听力，新闻题弱，学习 35 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5959,
+          "prompt_tokens": 6262,
+          "completion_tokens": 22,
+          "total_tokens": 6284,
+          "loop_status": "final",
+          "answer": "英语六级听力，新闻题弱，学习 35 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m039",
+      "category": "summary_only",
+      "question": "我 7 月 11 日 SQL 索引学了什么，学了多久？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 275,
+          "completion_tokens": 25,
+          "total_tokens": 300,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 689,
+          "completion_tokens": 25,
+          "total_tokens": 714,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6194,
+          "completion_tokens": 23,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "SQL 索引与 EXPLAIN 执行计划，学习 55 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5912,
+          "prompt_tokens": 6218,
+          "completion_tokens": 23,
+          "total_tokens": 6241,
+          "loop_status": "final",
+          "answer": "SQL 索引与 EXPLAIN 执行计划，学习 55 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m040",
+      "category": "summary_only",
+      "question": "我 7 月 17 日问数项目复盘重点是什么？",
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 27,
+          "total_tokens": 6220,
+          "loop_status": "final",
+          "answer": "SQL 问数项目复盘，重点 SQL 白名单安全，学习 60 分钟。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6080,
+          "prompt_tokens": 6384,
+          "completion_tokens": 27,
+          "total_tokens": 6411,
+          "loop_status": "final",
+          "answer": "SQL 问数项目复盘，重点 SQL 白名单安全，学习 60 分钟。"
+        }
+      }
+    },
+    {
+      "question_id": "m041",
+      "category": "kv_only",
+      "question": "我最喜欢的咖啡馆是哪家，常点什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 273,
+          "completion_tokens": 25,
+          "total_tokens": 298,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 25,
+          "total_tokens": 6218,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6008,
+          "prompt_tokens": 6311,
+          "completion_tokens": 23,
+          "total_tokens": 6334,
+          "loop_status": "final",
+          "answer": "最喜欢的咖啡馆是 Manner 咖啡，常点冰拿铁。"
+        }
+      }
+    },
+    {
+      "question_id": "m042",
+      "category": "kv_only",
+      "question": "我 2025 年底的健身目标是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 271,
+          "completion_tokens": 25,
+          "total_tokens": 296,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 685,
+          "completion_tokens": 25,
+          "total_tokens": 710,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6190,
+          "completion_tokens": 25,
+          "total_tokens": 6215,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6033,
+          "prompt_tokens": 6334,
+          "completion_tokens": 17,
+          "total_tokens": 6351,
+          "loop_status": "final",
+          "answer": "2025 年底体脂率降到 18%。"
+        }
+      }
+    },
+    {
+      "question_id": "m043",
+      "category": "kv_only",
+      "question": "我明年的旅行愿望是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 269,
+          "completion_tokens": 25,
+          "total_tokens": 294,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 684,
+          "completion_tokens": 25,
+          "total_tokens": 709,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6189,
+          "completion_tokens": 25,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6033,
+          "prompt_tokens": 6333,
+          "completion_tokens": 18,
+          "total_tokens": 6351,
+          "loop_status": "final",
+          "answer": "明年想去日本京都看红叶。"
+        }
+      }
+    },
+    {
+      "question_id": "m044",
+      "category": "kv_only",
+      "question": "我的工资卡是哪家银行，尾号多少？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 272,
+          "completion_tokens": 25,
+          "total_tokens": 297,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 687,
+          "completion_tokens": 25,
+          "total_tokens": 712,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6192,
+          "completion_tokens": 25,
+          "total_tokens": 6217,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5984,
+          "prompt_tokens": 6287,
+          "completion_tokens": 18,
+          "total_tokens": 6305,
+          "loop_status": "final",
+          "answer": "工资卡是招商银行尾号 8848。"
+        }
+      }
+    },
+    {
+      "question_id": "m045",
+      "category": "kv_only",
+      "question": "我对什么食物过敏？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 267,
+          "completion_tokens": 25,
+          "total_tokens": 292,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 682,
+          "completion_tokens": 25,
+          "total_tokens": 707,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6187,
+          "completion_tokens": 25,
+          "total_tokens": 6212,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5914,
+          "prompt_tokens": 6212,
+          "completion_tokens": 20,
+          "total_tokens": 6232,
+          "loop_status": "final",
+          "answer": "对花生过敏，点餐必须避开花生。"
+        }
+      }
+    },
+    {
+      "question_id": "m046",
+      "category": "kv_only",
+      "question": "我的 GitHub 用户名是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 269,
+          "completion_tokens": 25,
+          "total_tokens": 294,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 684,
+          "completion_tokens": 25,
+          "total_tokens": 709,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6189,
+          "completion_tokens": 25,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5960,
+          "prompt_tokens": 6260,
+          "completion_tokens": 17,
+          "total_tokens": 6277,
+          "loop_status": "final",
+          "answer": "GitHub 用户名是 hujiao-dev。"
+        }
+      }
+    },
+    {
+      "question_id": "m047",
+      "category": "kv_only",
+      "question": "我每周的站会是什么时间？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 269,
+          "completion_tokens": 25,
+          "total_tokens": 294,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 684,
+          "completion_tokens": 25,
+          "total_tokens": 709,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6189,
+          "completion_tokens": 25,
+          "total_tokens": 6214,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5983,
+          "prompt_tokens": 6283,
+          "completion_tokens": 16,
+          "total_tokens": 6299,
+          "loop_status": "final",
+          "answer": "每周一上午 10 点站会。"
+        }
+      }
+    },
+    {
+      "question_id": "m048",
+      "category": "kv_only",
+      "question": "我 2025 年的读书目标是什么，进度如何？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 274,
+          "completion_tokens": 25,
+          "total_tokens": 299,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 688,
+          "completion_tokens": 25,
+          "total_tokens": 713,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6193,
+          "completion_tokens": 25,
+          "total_tokens": 6218,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6033,
+          "prompt_tokens": 6337,
+          "completion_tokens": 20,
+          "total_tokens": 6357,
+          "loop_status": "final",
+          "answer": "2025 年要读完 24 本书，目前 17 本。"
+        }
+      }
+    },
+    {
+      "question_id": "m049",
+      "category": "cross",
+      "question": "我 6 月初学装饰器那段时间，最常去的咖啡馆和常点单品是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 282,
+          "completion_tokens": 25,
+          "total_tokens": 307,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 697,
+          "completion_tokens": 25,
+          "total_tokens": 722,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6202,
+          "completion_tokens": 25,
+          "total_tokens": 6227,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6031,
+          "prompt_tokens": 6344,
+          "completion_tokens": 25,
+          "total_tokens": 6369,
+          "loop_status": "final",
+          "answer": "学闭包 + @wraps 期间常去 Manner 咖啡，常点冰拿铁。"
+        }
+      }
+    },
+    {
+      "question_id": "m050",
+      "category": "cross",
+      "question": "我 8 月 11 日复习装饰器时，最喜欢的咖啡馆是哪家？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 278,
+          "completion_tokens": 25,
+          "total_tokens": 303,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 692,
+          "completion_tokens": 25,
+          "total_tokens": 717,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6197,
+          "completion_tokens": 25,
+          "total_tokens": 6222,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6006,
+          "prompt_tokens": 6315,
+          "completion_tokens": 26,
+          "total_tokens": 6341,
+          "loop_status": "final",
+          "answer": "8 月 11 日复习装饰器时常去 Manner 咖啡，点冰拿铁。"
+        }
+      }
+    },
+    {
+      "question_id": "m051",
+      "category": "cross",
+      "question": "我 7 月学 SQLite 只读连接时，年底健身目标是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 692,
+          "completion_tokens": 25,
+          "total_tokens": 717,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6197,
+          "completion_tokens": 25,
+          "total_tokens": 6222,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6007,
+          "prompt_tokens": 6315,
+          "completion_tokens": 25,
+          "total_tokens": 6340,
+          "loop_status": "final",
+          "answer": "学只读连接与白名单时，目标是体脂率降到 18%。"
+        }
+      }
+    },
+    {
+      "question_id": "m052",
+      "category": "cross",
+      "question": "我 8 月 20 日看完《奥本海默》后，明年的旅行愿望是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 280,
+          "completion_tokens": 25,
+          "total_tokens": 305,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 695,
+          "completion_tokens": 25,
+          "total_tokens": 720,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6200,
+          "completion_tokens": 25,
+          "total_tokens": 6225,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6033,
+          "prompt_tokens": 6343,
+          "completion_tokens": 26,
+          "total_tokens": 6369,
+          "loop_status": "final",
+          "answer": "看完《奥本海默》后，计划明年去日本京都看红叶。"
+        }
+      }
+    },
+    {
+      "question_id": "m053",
+      "category": "cross",
+      "question": "从 6 月学 FastAPI 依赖注入到 8 月复习 FastAPI SSE，我最喜欢的咖啡馆是哪家？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 285,
+          "completion_tokens": 25,
+          "total_tokens": 310,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 700,
+          "completion_tokens": 25,
+          "total_tokens": 725,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6205,
+          "completion_tokens": 25,
+          "total_tokens": 6230,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6005,
+          "prompt_tokens": 6321,
+          "completion_tokens": 25,
+          "total_tokens": 6346,
+          "loop_status": "final",
+          "answer": "从依赖注入到复习 FastAPI SSE，常喝 Manner 冰拿铁。"
+        }
+      }
+    },
+    {
+      "question_id": "m054",
+      "category": "cross",
+      "question": "我 6 月练习 pytest fixture 时，工资卡是哪个银行？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 276,
+          "completion_tokens": 25,
+          "total_tokens": 301,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 25,
+          "total_tokens": 6221,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5981,
+          "prompt_tokens": 6288,
+          "completion_tokens": 22,
+          "total_tokens": 6310,
+          "loop_status": "final",
+          "answer": "练 fixture 时工资卡是招商银行尾号 8848。"
+        }
+      }
+    },
+    {
+      "question_id": "m055",
+      "category": "cross",
+      "question": "我 8 月 23 日复习 httpx 重试机制后，记得自己对什么过敏？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 280,
+          "completion_tokens": 25,
+          "total_tokens": 305,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 694,
+          "completion_tokens": 25,
+          "total_tokens": 719,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6199,
+          "completion_tokens": 25,
+          "total_tokens": 6224,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 5960,
+          "prompt_tokens": 6270,
+          "completion_tokens": 20,
+          "total_tokens": 6290,
+          "loop_status": "final",
+          "answer": "复习指数退避时记得对花生过敏。"
+        }
+      }
+    },
+    {
+      "question_id": "m056",
+      "category": "cross",
+      "question": "我 7 月练英语听力时，之后定的读书目标是什么？",
+      "expected_strategies": [
+        "full"
+      ],
+      "strategies": {
+        "none": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 0,
+          "prompt_tokens": 277,
+          "completion_tokens": 25,
+          "total_tokens": 302,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 384,
+          "prompt_tokens": 691,
+          "completion_tokens": 25,
+          "total_tokens": 716,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "window_summary": {
+          "hit": false,
+          "matched": 0,
+          "total": 1,
+          "coverage": 0.0,
+          "context_tokens": 5889,
+          "prompt_tokens": 6196,
+          "completion_tokens": 25,
+          "total_tokens": 6221,
+          "loop_status": "final",
+          "answer": "根据当前记忆上下文，我暂时无法回答这个问题。"
+        },
+        "full": {
+          "hit": true,
+          "matched": 1,
+          "total": 1,
+          "coverage": 1.0,
+          "context_tokens": 6009,
+          "prompt_tokens": 6317,
+          "completion_tokens": 21,
+          "total_tokens": 6338,
+          "loop_status": "final",
+          "answer": "练新闻题时计划 2025 年读完 24 本书。"
+        }
+      }
+    }
+  ]
+}

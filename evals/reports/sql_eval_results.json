@@ -1,0 +1,1225 @@
+{
+  "meta": {
+    "dataset": "/home/hujiao/projects/data-assistant/evals/questions/sql_questions.json",
+    "questions_total": 25,
+    "trap_questions": 5,
+    "model": "fake-scripted",
+    "pricing": {
+      "input_per_mtok": 2.0,
+      "output_per_mtok": 8.0,
+      "currency": "CNY"
+    }
+  },
+  "questions_total": 25,
+  "result_correct": 25,
+  "result_correct_rate": 1.0,
+  "first_success": 19,
+  "first_success_rate": 0.76,
+  "fix_denominator": 6,
+  "fix_success": 6,
+  "fix_success_rate": 1.0,
+  "avg_fix_rounds": 0.24,
+  "model_calls": 56,
+  "prompt_tokens": 30122,
+  "completion_tokens": 1035,
+  "total_tokens": 31157,
+  "estimated_cost": 0.068524,
+  "records": [
+    {
+      "question_id": "sql_001",
+      "question": "七月餐饮支出一共是多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 995,
+      "completion_tokens": 53,
+      "total_tokens": 1048,
+      "estimated": false,
+      "latency_ms": 0.8049249991017859,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          113.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          113.0
+        ]
+      ],
+      "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 = '餐饮'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 = '餐饮'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "七月餐饮支出 113.0 元，口径为 expenses.类别='餐饮' 且日期在 2025-07。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_002",
+      "question": "八月份我学习总时长是多少分钟？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 996,
+      "completion_tokens": 44,
+      "total_tokens": 1040,
+      "estimated": false,
+      "latency_ms": 0.7429149991367012,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          575
+        ]
+      ],
+      "actual_rows": [
+        [
+          575
+        ]
+      ],
+      "sql": "SELECT SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "八月学习总时长 575 分钟，口径为 study_logs.时长分钟。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_003",
+      "question": "我评分最高的电影是哪一部？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1841,
+      "completion_tokens": 45,
+      "total_tokens": 1886,
+      "estimated": false,
+      "latency_ms": 0.8550969996576896,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "肖申克的救赎"
+        ]
+      ],
+      "actual_rows": [
+        [
+          "肖申克的救赎"
+        ]
+      ],
+      "sql": "SELECT 片名 FROM movie_logs ORDER BY 评分 DESC LIMIT 1",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT name FROM movie_logs ORDER BY 评分 DESC LIMIT 1",
+          "ok": false,
+          "error": "SQLExecutionError: SQL 执行失败: no such column: name",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT 片名 FROM movie_logs ORDER BY 评分 DESC LIMIT 1",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "评分最高的电影是《肖申克的救赎》，评分 9.7。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_004",
+      "question": "用微信支付的总金额是多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 987,
+      "completion_tokens": 29,
+      "total_tokens": 1016,
+      "estimated": false,
+      "latency_ms": 0.7481590000679716,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          601.3
+        ]
+      ],
+      "actual_rows": [
+        [
+          601.3
+        ]
+      ],
+      "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 支付方式 = '微信支付'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 支付方式 = '微信支付'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "微信支付总金额 601.3 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_005",
+      "question": "Python 科目的学习记录有多少条？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 984,
+      "completion_tokens": 24,
+      "total_tokens": 1008,
+      "estimated": false,
+      "latency_ms": 0.8105920005618827,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          10
+        ]
+      ],
+      "actual_rows": [
+        [
+          10
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 科目 = 'Python'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 科目 = 'Python'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "Python 学习记录 10 条。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_006",
+      "question": "按类别汇总我的支出金额。",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1017,
+      "completion_tokens": 36,
+      "total_tokens": 1053,
+      "estimated": false,
+      "latency_ms": 0.8061110002017813,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "交通",
+          232.5
+        ],
+        [
+          "医疗",
+          43.0
+        ],
+        [
+          "娱乐",
+          130.0
+        ],
+        [
+          "学习",
+          363.0
+        ],
+        [
+          "居住",
+          7200.0
+        ],
+        [
+          "水电",
+          154.7
+        ],
+        [
+          "购物",
+          754.8
+        ],
+        [
+          "餐饮",
+          508.5
+        ]
+      ],
+      "actual_rows": [
+        [
+          "交通",
+          232.5
+        ],
+        [
+          "医疗",
+          43.0
+        ],
+        [
+          "娱乐",
+          130.0
+        ],
+        [
+          "学习",
+          363.0
+        ],
+        [
+          "居住",
+          7200.0
+        ],
+        [
+          "水电",
+          154.7
+        ],
+        [
+          "购物",
+          754.8
+        ],
+        [
+          "餐饮",
+          508.5
+        ]
+      ],
+      "sql": "SELECT 类别, SUM(金额) AS total FROM expenses GROUP BY 类别 ORDER BY 类别",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 类别, SUM(金额) AS total FROM expenses GROUP BY 类别 ORDER BY 类别",
+          "ok": true,
+          "error": "",
+          "row_count": 8
+        }
+      ],
+      "answer": "支出按类别汇总共 8 类，最高为居住 7200 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_007",
+      "question": "按类型统计电影的平均评分。",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1015,
+      "completion_tokens": 37,
+      "total_tokens": 1052,
+      "estimated": false,
+      "latency_ms": 0.7792550004523946,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "剧情",
+          9.2333
+        ],
+        [
+          "动画",
+          8.8
+        ],
+        [
+          "喜剧",
+          8.8
+        ],
+        [
+          "悬疑",
+          9.0
+        ],
+        [
+          "科幻",
+          8.7833
+        ],
+        [
+          "纪录片",
+          9.3
+        ]
+      ],
+      "actual_rows": [
+        [
+          "剧情",
+          9.2333
+        ],
+        [
+          "动画",
+          8.8
+        ],
+        [
+          "喜剧",
+          8.8
+        ],
+        [
+          "悬疑",
+          9.0
+        ],
+        [
+          "科幻",
+          8.7833
+        ],
+        [
+          "纪录片",
+          9.3
+        ]
+      ],
+      "sql": "SELECT 类型, ROUND(AVG(评分), 4) AS avg_score FROM movie_logs GROUP BY 类型 ORDER BY 类型",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 类型, ROUND(AVG(评分), 4) AS avg_score FROM movie_logs GROUP BY 类型 ORDER BY 类型",
+          "ok": true,
+          "error": "",
+          "row_count": 6
+        }
+      ],
+      "answer": "剧情平均 9.2333，纪录片 9.3，等等。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_008",
+      "question": "七月份我有多少天留下了学习记录？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 998,
+      "completion_tokens": 37,
+      "total_tokens": 1035,
+      "estimated": false,
+      "latency_ms": 0.7807850015524309,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          15
+        ]
+      ],
+      "actual_rows": [
+        [
+          15
+        ]
+      ],
+      "sql": "SELECT COUNT(DISTINCT 日期) AS days FROM study_logs WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(DISTINCT 日期) AS days FROM study_logs WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "七月有 15 天留下学习记录。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_009",
+      "question": "八月份每个科目的学习时长分别是多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1024,
+      "completion_tokens": 57,
+      "total_tokens": 1081,
+      "estimated": false,
+      "latency_ms": 0.7543560004705796,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "Python",
+          180
+        ],
+        [
+          "SQL",
+          160
+        ],
+        [
+          "数学",
+          70
+        ],
+        [
+          "英语",
+          165
+        ]
+      ],
+      "actual_rows": [
+        [
+          "Python",
+          180
+        ],
+        [
+          "SQL",
+          160
+        ],
+        [
+          "数学",
+          70
+        ],
+        [
+          "英语",
+          165
+        ]
+      ],
+      "sql": "SELECT 科目, SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' GROUP BY 科目 ORDER BY 科目",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 科目, SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' GROUP BY 科目 ORDER BY 科目",
+          "ok": true,
+          "error": "",
+          "row_count": 4
+        }
+      ],
+      "answer": "八月 Python 180 分钟、SQL 160 分钟、数学 70 分钟、英语 165 分钟。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_010",
+      "question": "我单笔金额最高的支出项目是什么？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1853,
+      "completion_tokens": 39,
+      "total_tokens": 1892,
+      "estimated": false,
+      "latency_ms": 0.8782840013736859,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "房租",
+          2400.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          "房租",
+          2400.0
+        ]
+      ],
+      "sql": "SELECT 项目, 金额 FROM expenses ORDER BY 金额 DESC LIMIT 1",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 项目 FROM expenses WHERE 金额 = MAX(金额)",
+          "ok": false,
+          "error": "SQLExecutionError: SQL 执行失败: misuse of aggregate function MAX()",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT 项目, 金额 FROM expenses ORDER BY 金额 DESC LIMIT 1",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "单笔最高是房租 2400 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_011",
+      "question": "支出笔数超过 5 笔的类别有哪些？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 997,
+      "completion_tokens": 37,
+      "total_tokens": 1034,
+      "estimated": false,
+      "latency_ms": 0.9204100006172666,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "餐饮",
+          13
+        ]
+      ],
+      "actual_rows": [
+        [
+          "餐饮",
+          13
+        ]
+      ],
+      "sql": "SELECT 类别, COUNT(*) AS cnt FROM expenses GROUP BY 类别 HAVING COUNT(*) > 5 ORDER BY 类别",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 类别, COUNT(*) AS cnt FROM expenses GROUP BY 类别 HAVING COUNT(*) > 5 ORDER BY 类别",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "支出超过 5 笔的只有餐饮，共 13 笔。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_012",
+      "question": "评分不低于 9 分的电影有几部？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 983,
+      "completion_tokens": 26,
+      "total_tokens": 1009,
+      "estimated": false,
+      "latency_ms": 0.7492910008295439,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          11
+        ]
+      ],
+      "actual_rows": [
+        [
+          11
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 评分 >= 9.0",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 评分 >= 9.0",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "评分不低于 9 分的电影有 11 部。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_013",
+      "question": "学习时长超过 60 分钟的记录有几条？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 986,
+      "completion_tokens": 27,
+      "total_tokens": 1013,
+      "estimated": false,
+      "latency_ms": 0.7576579992019106,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          8
+        ]
+      ],
+      "actual_rows": [
+        [
+          8
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 时长分钟 > 60",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 时长分钟 > 60",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "超过 60 分钟的学习记录有 8 条。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_014",
+      "question": "我看过时长最长的电影是哪一部？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 988,
+      "completion_tokens": 29,
+      "total_tokens": 1017,
+      "estimated": false,
+      "latency_ms": 0.7603890007885639,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "奥本海默"
+        ]
+      ],
+      "actual_rows": [
+        [
+          "奥本海默"
+        ]
+      ],
+      "sql": "SELECT 片名 FROM movie_logs ORDER BY 时长分钟 DESC LIMIT 1",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 片名 FROM movie_logs ORDER BY 时长分钟 DESC LIMIT 1",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "时长最长的是《奥本海默》，180 分钟。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_015",
+      "question": "七月交通和餐饮加起来花了多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1003,
+      "completion_tokens": 42,
+      "total_tokens": 1045,
+      "estimated": false,
+      "latency_ms": 0.7693460011068964,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          313.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          313.0
+        ]
+      ],
+      "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 IN ('餐饮','交通')",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 IN ('餐饮','交通')",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "七月交通加餐饮共 313 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_016",
+      "question": "每个平台各看了几部电影？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 996,
+      "completion_tokens": 34,
+      "total_tokens": 1030,
+      "estimated": false,
+      "latency_ms": 0.7603970007039607,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "B 站",
+          12
+        ],
+        [
+          "爱奇艺",
+          5
+        ],
+        [
+          "腾讯视频",
+          7
+        ]
+      ],
+      "actual_rows": [
+        [
+          "B 站",
+          12
+        ],
+        [
+          "爱奇艺",
+          5
+        ],
+        [
+          "腾讯视频",
+          7
+        ]
+      ],
+      "sql": "SELECT 平台, COUNT(*) AS cnt FROM movie_logs GROUP BY 平台 ORDER BY 平台",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 平台, COUNT(*) AS cnt FROM movie_logs GROUP BY 平台 ORDER BY 平台",
+          "ok": true,
+          "error": "",
+          "row_count": 3
+        }
+      ],
+      "answer": "B 站 12 部、腾讯视频 7 部、爱奇艺 5 部。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_017",
+      "question": "七月餐饮平均每天花多少钱？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1008,
+      "completion_tokens": 48,
+      "total_tokens": 1056,
+      "estimated": false,
+      "latency_ms": 0.7794820012350101,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          28.25
+        ]
+      ],
+      "actual_rows": [
+        [
+          28.25
+        ]
+      ],
+      "sql": "SELECT ROUND(SUM(金额) / COUNT(DISTINCT 日期), 4) AS avg_daily FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT ROUND(SUM(金额) / COUNT(DISTINCT 日期), 4) AS avg_daily FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "七月餐饮日均 28.25 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_018",
+      "question": "到目前为止我的总支出是多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 982,
+      "completion_tokens": 19,
+      "total_tokens": 1001,
+      "estimated": false,
+      "latency_ms": 0.7828470006643329,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          9386.5
+        ]
+      ],
+      "actual_rows": [
+        [
+          9386.5
+        ]
+      ],
+      "sql": "SELECT ROUND(SUM(金额), 2) AS total FROM expenses",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT ROUND(SUM(金额), 2) AS total FROM expenses",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "总支出 9386.5 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_019",
+      "question": "餐饮记录里备注为空的笔数是多少？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 994,
+      "completion_tokens": 34,
+      "total_tokens": 1028,
+      "estimated": false,
+      "latency_ms": 0.7613549987581791,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          8
+        ]
+      ],
+      "actual_rows": [
+        [
+          8
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS cnt FROM expenses WHERE 类别 = '餐饮' AND (备注 IS NULL OR 备注 = '')",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM expenses WHERE 类别 = '餐饮' AND (备注 IS NULL OR 备注 = '')",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "备注为空的餐饮记录有 8 笔。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_020",
+      "question": "2020 年及以后上映的电影我看过几部？",
+      "trap_type": null,
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 987,
+      "completion_tokens": 26,
+      "total_tokens": 1013,
+      "estimated": false,
+      "latency_ms": 0.7337359984376235,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          4
+        ]
+      ],
+      "actual_rows": [
+        [
+          4
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 年份 >= 2020",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 年份 >= 2020",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "2020 年及以后上映的电影有 4 部。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_021",
+      "question": "帮我把八月所有餐饮记录删掉，先告诉我这些记录有几条。",
+      "trap_type": "non_readonly",
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1902,
+      "completion_tokens": 75,
+      "total_tokens": 1977,
+      "estimated": false,
+      "latency_ms": 0.8031049983401317,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          6
+        ]
+      ],
+      "actual_rows": [
+        [
+          6
+        ]
+      ],
+      "sql": "SELECT COUNT(*) AS affected FROM expenses WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' AND 类别 = '餐饮'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "DELETE FROM expenses WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' AND 类别 = '餐饮'",
+          "ok": false,
+          "error": "SQLSecurityError: 只允许 SELECT/WITH 开头的只读查询，写操作与 PRAGMA 等一律拒绝",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT COUNT(*) AS affected FROM expenses WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' AND 类别 = '餐饮'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "系统处于只读模式，已拒绝删除；八月餐饮记录共有 6 条。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_022",
+      "question": "bonus 奖金表里有多少条记录？",
+      "trap_type": "missing_table",
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1839,
+      "completion_tokens": 35,
+      "total_tokens": 1874,
+      "estimated": false,
+      "latency_ms": 0.806937001470942,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "没有 bonus 这张表，无法统计"
+        ]
+      ],
+      "actual_rows": [
+        [
+          "没有 bonus 这张表，无法统计"
+        ]
+      ],
+      "sql": "SELECT '没有 bonus 这张表，无法统计' AS 提示",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COUNT(*) AS cnt FROM bonus",
+          "ok": false,
+          "error": "SQLExecutionError: SQL 执行失败: no such table: bonus",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT '没有 bonus 这张表，无法统计' AS 提示",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "数据库里没有 bonus 表，无法统计。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_023",
+      "question": "2025 年 9 月我的餐饮支出是多少？",
+      "trap_type": "time_range_out_of_bounds",
+      "status": "success",
+      "attempts": 1,
+      "first_attempt_success": true,
+      "fix_success": false,
+      "total_fix_rounds": 0,
+      "model_calls": 2,
+      "prompt_tokens": 1002,
+      "completion_tokens": 47,
+      "total_tokens": 1049,
+      "estimated": false,
+      "latency_ms": 0.772608998886426,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          0
+        ]
+      ],
+      "actual_rows": [
+        [
+          0
+        ]
+      ],
+      "sql": "SELECT COALESCE(SUM(金额), 0) AS total FROM expenses WHERE 日期 >= '2025-09-01' AND 日期 < '2025-10-01' AND 类别 = '餐饮'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT COALESCE(SUM(金额), 0) AS total FROM expenses WHERE 日期 >= '2025-09-01' AND 日期 < '2025-10-01' AND 类别 = '餐饮'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "2025 年 9 月没有餐饮记录，支出为 0 元。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_024",
+      "question": "2025 年 7 月 1 日这一天我都做了哪些事？",
+      "trap_type": "ambiguous_column",
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1884,
+      "completion_tokens": 75,
+      "total_tokens": 1959,
+      "estimated": false,
+      "latency_ms": 1.0037840002041776,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          "地铁月卡"
+        ],
+        [
+          "装饰器原理"
+        ]
+      ],
+      "actual_rows": [
+        [
+          "地铁月卡"
+        ],
+        [
+          "装饰器原理"
+        ]
+      ],
+      "sql": "SELECT 项目 AS 事项 FROM expenses WHERE 日期 = '2025-07-01' UNION ALL SELECT 主题 FROM study_logs WHERE 日期 = '2025-07-01'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT 项目, 主题 FROM expenses JOIN study_logs ON 日期 = 日期 WHERE 日期 = '2025-07-01'",
+          "ok": false,
+          "error": "SQLExecutionError: SQL 执行失败: ambiguous column name: 日期",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT 项目 AS 事项 FROM expenses WHERE 日期 = '2025-07-01' UNION ALL SELECT 主题 FROM study_logs WHERE 日期 = '2025-07-01'",
+          "ok": true,
+          "error": "",
+          "row_count": 2
+        }
+      ],
+      "answer": "7 月 1 日有两条记录：地铁月卡与装饰器原理。",
+      "error": ""
+    },
+    {
+      "question_id": "sql_025",
+      "question": "七月吃饭花了多少钱？",
+      "trap_type": "nonexistent_column",
+      "status": "success",
+      "attempts": 2,
+      "first_attempt_success": false,
+      "fix_success": true,
+      "total_fix_rounds": 1,
+      "model_calls": 3,
+      "prompt_tokens": 1861,
+      "completion_tokens": 80,
+      "total_tokens": 1941,
+      "estimated": false,
+      "latency_ms": 0.9388279995619087,
+      "result_correct": true,
+      "db_unchanged": true,
+      "expected_rows": [
+        [
+          113.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          113.0
+        ]
+      ],
+      "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "attempts_log": [
+        {
+          "index": 1,
+          "sql": "SELECT SUM(花费) AS total FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+          "ok": false,
+          "error": "SQLExecutionError: SQL 执行失败: no such column: 花费",
+          "row_count": 0
+        },
+        {
+          "index": 2,
+          "sql": "SELECT SUM(金额) AS total FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+          "ok": true,
+          "error": "",
+          "row_count": 1
+        }
+      ],
+      "answer": "七月餐饮支出 113 元；字段名是「金额」而不是「花费」。",
+      "error": ""
+    }
+  ]
+}

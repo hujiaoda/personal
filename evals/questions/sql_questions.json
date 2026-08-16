@@ -1,0 +1,480 @@
+{
+  "meta": {
+    "name": "智能问数 SQL 评测集",
+    "version": "1.0",
+    "generated_at": "2025-08-24T12:00:00+00:00",
+    "fixture": "data/demo.build_demo_tables() 的确定性演示库（expenses 32 行 / study_logs 26 行 / movie_logs 24 行）",
+    "pricing": {
+      "input_per_mtok": 2.0,
+      "output_per_mtok": 8.0,
+      "currency": "CNY"
+    },
+    "note": "fake 模型按题目脚本化输出：常规题多数首轮正确，3 道常规题与 4 道陷阱题首轮故意出错，用于测量修正成功率。"
+  },
+  "questions": [
+    {
+      "id": "sql_001",
+      "question": "七月餐饮支出一共是多少？",
+      "trap_type": null,
+      "first_sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 = '餐饮'",
+      "fix_sqls": [],
+      "explanation": "七月餐饮支出 113.0 元，口径为 expenses.类别='餐饮' 且日期在 2025-07。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          113.0
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_002",
+      "question": "八月份我学习总时长是多少分钟？",
+      "trap_type": null,
+      "first_sql": "SELECT SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01'",
+      "fix_sqls": [],
+      "explanation": "八月学习总时长 575 分钟，口径为 study_logs.时长分钟。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          575
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_003",
+      "question": "我评分最高的电影是哪一部？",
+      "trap_type": null,
+      "first_sql": "SELECT name FROM movie_logs ORDER BY 评分 DESC LIMIT 1",
+      "fix_sqls": [
+        "SELECT 片名 FROM movie_logs ORDER BY 评分 DESC LIMIT 1"
+      ],
+      "explanation": "评分最高的电影是《肖申克的救赎》，评分 9.7。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "肖申克的救赎"
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_004",
+      "question": "用微信支付的总金额是多少？",
+      "trap_type": null,
+      "first_sql": "SELECT SUM(金额) AS total FROM expenses WHERE 支付方式 = '微信支付'",
+      "fix_sqls": [],
+      "explanation": "微信支付总金额 601.3 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          601.3
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_005",
+      "question": "Python 科目的学习记录有多少条？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 科目 = 'Python'",
+      "fix_sqls": [],
+      "explanation": "Python 学习记录 10 条。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          10
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_006",
+      "question": "按类别汇总我的支出金额。",
+      "trap_type": null,
+      "first_sql": "SELECT 类别, SUM(金额) AS total FROM expenses GROUP BY 类别 ORDER BY 类别",
+      "fix_sqls": [],
+      "explanation": "支出按类别汇总共 8 类，最高为居住 7200 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "交通",
+          232.5
+        ],
+        [
+          "医疗",
+          43.0
+        ],
+        [
+          "娱乐",
+          130.0
+        ],
+        [
+          "学习",
+          363.0
+        ],
+        [
+          "居住",
+          7200.0
+        ],
+        [
+          "水电",
+          154.7
+        ],
+        [
+          "购物",
+          754.8
+        ],
+        [
+          "餐饮",
+          508.5
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_007",
+      "question": "按类型统计电影的平均评分。",
+      "trap_type": null,
+      "first_sql": "SELECT 类型, ROUND(AVG(评分), 4) AS avg_score FROM movie_logs GROUP BY 类型 ORDER BY 类型",
+      "fix_sqls": [],
+      "explanation": "剧情平均 9.2333，纪录片 9.3，等等。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "剧情",
+          9.2333
+        ],
+        [
+          "动画",
+          8.8
+        ],
+        [
+          "喜剧",
+          8.8
+        ],
+        [
+          "悬疑",
+          9.0
+        ],
+        [
+          "科幻",
+          8.7833
+        ],
+        [
+          "纪录片",
+          9.3
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_008",
+      "question": "七月份我有多少天留下了学习记录？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(DISTINCT 日期) AS days FROM study_logs WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "fix_sqls": [],
+      "explanation": "七月有 15 天留下学习记录。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          15
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_009",
+      "question": "八月份每个科目的学习时长分别是多少？",
+      "trap_type": null,
+      "first_sql": "SELECT 科目, SUM(时长分钟) AS total FROM study_logs WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' GROUP BY 科目 ORDER BY 科目",
+      "fix_sqls": [],
+      "explanation": "八月 Python 180 分钟、SQL 160 分钟、数学 70 分钟、英语 165 分钟。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "Python",
+          180
+        ],
+        [
+          "SQL",
+          160
+        ],
+        [
+          "数学",
+          70
+        ],
+        [
+          "英语",
+          165
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_010",
+      "question": "我单笔金额最高的支出项目是什么？",
+      "trap_type": null,
+      "first_sql": "SELECT 项目 FROM expenses WHERE 金额 = MAX(金额)",
+      "fix_sqls": [
+        "SELECT 项目, 金额 FROM expenses ORDER BY 金额 DESC LIMIT 1"
+      ],
+      "explanation": "单笔最高是房租 2400 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "房租",
+          2400.0
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_011",
+      "question": "支出笔数超过 5 笔的类别有哪些？",
+      "trap_type": null,
+      "first_sql": "SELECT 类别, COUNT(*) AS cnt FROM expenses GROUP BY 类别 HAVING COUNT(*) > 5 ORDER BY 类别",
+      "fix_sqls": [],
+      "explanation": "支出超过 5 笔的只有餐饮，共 13 笔。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "餐饮",
+          13
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_012",
+      "question": "评分不低于 9 分的电影有几部？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 评分 >= 9.0",
+      "fix_sqls": [],
+      "explanation": "评分不低于 9 分的电影有 11 部。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          11
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_013",
+      "question": "学习时长超过 60 分钟的记录有几条？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(*) AS cnt FROM study_logs WHERE 时长分钟 > 60",
+      "fix_sqls": [],
+      "explanation": "超过 60 分钟的学习记录有 8 条。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          8
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_014",
+      "question": "我看过时长最长的电影是哪一部？",
+      "trap_type": null,
+      "first_sql": "SELECT 片名 FROM movie_logs ORDER BY 时长分钟 DESC LIMIT 1",
+      "fix_sqls": [],
+      "explanation": "时长最长的是《奥本海默》，180 分钟。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "奥本海默"
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_015",
+      "question": "七月交通和餐饮加起来花了多少？",
+      "trap_type": null,
+      "first_sql": "SELECT SUM(金额) AS total FROM expenses WHERE 日期 >= '2025-07-01' AND 日期 < '2025-08-01' AND 类别 IN ('餐饮','交通')",
+      "fix_sqls": [],
+      "explanation": "七月交通加餐饮共 313 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          313.0
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_016",
+      "question": "每个平台各看了几部电影？",
+      "trap_type": null,
+      "first_sql": "SELECT 平台, COUNT(*) AS cnt FROM movie_logs GROUP BY 平台 ORDER BY 平台",
+      "fix_sqls": [],
+      "explanation": "B 站 12 部、腾讯视频 7 部、爱奇艺 5 部。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "B 站",
+          12
+        ],
+        [
+          "爱奇艺",
+          5
+        ],
+        [
+          "腾讯视频",
+          7
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_017",
+      "question": "七月餐饮平均每天花多少钱？",
+      "trap_type": null,
+      "first_sql": "SELECT ROUND(SUM(金额) / COUNT(DISTINCT 日期), 4) AS avg_daily FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "fix_sqls": [],
+      "explanation": "七月餐饮日均 28.25 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          28.25
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_018",
+      "question": "到目前为止我的总支出是多少？",
+      "trap_type": null,
+      "first_sql": "SELECT ROUND(SUM(金额), 2) AS total FROM expenses",
+      "fix_sqls": [],
+      "explanation": "总支出 9386.5 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          9386.5
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_019",
+      "question": "餐饮记录里备注为空的笔数是多少？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(*) AS cnt FROM expenses WHERE 类别 = '餐饮' AND (备注 IS NULL OR 备注 = '')",
+      "fix_sqls": [],
+      "explanation": "备注为空的餐饮记录有 8 笔。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          8
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_020",
+      "question": "2020 年及以后上映的电影我看过几部？",
+      "trap_type": null,
+      "first_sql": "SELECT COUNT(*) AS cnt FROM movie_logs WHERE 年份 >= 2020",
+      "fix_sqls": [],
+      "explanation": "2020 年及以后上映的电影有 4 部。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          4
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_021",
+      "question": "帮我把八月所有餐饮记录删掉，先告诉我这些记录有几条。",
+      "trap_type": "non_readonly",
+      "first_sql": "DELETE FROM expenses WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' AND 类别 = '餐饮'",
+      "fix_sqls": [
+        "SELECT COUNT(*) AS affected FROM expenses WHERE 日期 >= '2025-08-01' AND 日期 < '2025-09-01' AND 类别 = '餐饮'"
+      ],
+      "explanation": "系统处于只读模式，已拒绝删除；八月餐饮记录共有 6 条。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          6
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_022",
+      "question": "bonus 奖金表里有多少条记录？",
+      "trap_type": "missing_table",
+      "first_sql": "SELECT COUNT(*) AS cnt FROM bonus",
+      "fix_sqls": [
+        "SELECT '没有 bonus 这张表，无法统计' AS 提示"
+      ],
+      "explanation": "数据库里没有 bonus 表，无法统计。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "没有 bonus 这张表，无法统计"
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_023",
+      "question": "2025 年 9 月我的餐饮支出是多少？",
+      "trap_type": "time_range_out_of_bounds",
+      "first_sql": "SELECT COALESCE(SUM(金额), 0) AS total FROM expenses WHERE 日期 >= '2025-09-01' AND 日期 < '2025-10-01' AND 类别 = '餐饮'",
+      "fix_sqls": [],
+      "explanation": "2025 年 9 月没有餐饮记录，支出为 0 元。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          0
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_024",
+      "question": "2025 年 7 月 1 日这一天我都做了哪些事？",
+      "trap_type": "ambiguous_column",
+      "first_sql": "SELECT 项目, 主题 FROM expenses JOIN study_logs ON 日期 = 日期 WHERE 日期 = '2025-07-01'",
+      "fix_sqls": [
+        "SELECT 项目 AS 事项 FROM expenses WHERE 日期 = '2025-07-01' UNION ALL SELECT 主题 FROM study_logs WHERE 日期 = '2025-07-01'"
+      ],
+      "explanation": "7 月 1 日有两条记录：地铁月卡与装饰器原理。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          "地铁月卡"
+        ],
+        [
+          "装饰器原理"
+        ]
+      ],
+      "tolerance": 0.0001
+    },
+    {
+      "id": "sql_025",
+      "question": "七月吃饭花了多少钱？",
+      "trap_type": "nonexistent_column",
+      "first_sql": "SELECT SUM(花费) AS total FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'",
+      "fix_sqls": [
+        "SELECT SUM(金额) AS total FROM expenses WHERE 类别 = '餐饮' AND 日期 >= '2025-07-01' AND 日期 < '2025-08-01'"
+      ],
+      "explanation": "七月餐饮支出 113 元；字段名是「金额」而不是「花费」。",
+      "expected_status": "success",
+      "expected_rows": [
+        [
+          113.0
+        ]
+      ],
+      "tolerance": 0.0001
+    }
+  ]
+}

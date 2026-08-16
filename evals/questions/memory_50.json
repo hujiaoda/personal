@@ -1,0 +1,1508 @@
+{
+  "meta": {
+    "name": "个人记忆问答评测集",
+    "version": "1.0",
+    "now": "2025-08-24T12:00:00+00:00",
+    "generated_at": "2025-08-24T12:00:00+00:00",
+    "strategy_settings": {
+      "max_window_messages": 20,
+      "max_window_tokens": 8000,
+      "long_term_top_k": 8,
+      "decay_lambda": 0.05,
+      "summary_session_limit": 5,
+      "summary_daily_limit": 5,
+      "summary_weekly_limit": 3
+    },
+    "note": "最近 20 条消息构成 window；更早消息只在摘要通道中可命中；kv 只在 full 策略可命中。"
+  },
+  "corpus": [
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 Python 装饰器：闭包 + @wraps，并练习手写计时器，学习 45 分钟。",
+      "created_at": "2025-06-02T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 SQL SELECT 与聚合，重点 GROUP BY 执行顺序，学习 50 分钟。",
+      "created_at": "2025-06-03T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语六级阅读两篇，错 2 道，主要问题是长难句。",
+      "created_at": "2025-06-05T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 Python 生成器与 yield 的惰性求值，学习 60 分钟。",
+      "created_at": "2025-06-07T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做概率论刷题 80 分钟，覆盖期望值章节。",
+      "created_at": "2025-06-09T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天练习 SQL JOIN 55 分钟，重点内连接与外连接。",
+      "created_at": "2025-06-11T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 FastAPI 路由与依赖注入，学习 65 分钟。",
+      "created_at": "2025-06-13T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习线性代数特征值，学习 60 分钟。",
+      "created_at": "2025-06-15T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天练习英语口语跟读 25 分钟，重点是连读弱读。",
+      "created_at": "2025-06-17T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 pytest fixture 作用域，学习 90 分钟。",
+      "created_at": "2025-06-19T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 SQLite 只读连接与白名单，学习 80 分钟。",
+      "created_at": "2025-06-21T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 SQL 窗口函数，练习 ROW_NUMBER 排名，学习 75 分钟。",
+      "created_at": "2025-06-23T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天阅读 httpx 源码，重点超时与重试实现，学习 50 分钟。",
+      "created_at": "2025-06-25T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习类型标注与 typing 模块，学习 55 分钟。",
+      "created_at": "2025-06-27T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习上下文管理器的异常安全，学习 45 分钟。",
+      "created_at": "2025-06-29T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习递归 CTE，练习组织树查询，学习 60 分钟。",
+      "created_at": "2025-07-01T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 SQLite 时间函数入门：date/week 用法，学习 40 分钟。",
+      "created_at": "2025-07-03T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天整理概率论错题本，重点条件概率，学习 70 分钟。",
+      "created_at": "2025-07-05T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 FastAPI 流式 SSE 的实现，学习 65 分钟。",
+      "created_at": "2025-07-07T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语六级听力，新闻题弱，学习 35 分钟。",
+      "created_at": "2025-07-09T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天学习 SQL 索引与 EXPLAIN 执行计划，学习 55 分钟。",
+      "created_at": "2025-07-11T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 Python 装饰器并手写计时器，学习 30 分钟。",
+      "created_at": "2025-07-13T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天练习英语六级翻译，重点传统文化词，学习 45 分钟。",
+      "created_at": "2025-07-15T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做 SQL 问数项目复盘，重点 SQL 白名单安全，学习 60 分钟。",
+      "created_at": "2025-07-17T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语六级真题，阅读满分，学习 90 分钟。",
+      "created_at": "2025-07-19T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习类型标注，学习 40 分钟。",
+      "created_at": "2025-07-21T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习递归 CTE，学习 35 分钟。",
+      "created_at": "2025-07-23T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语口语模考，流利度提升，学习 30 分钟。",
+      "created_at": "2025-07-25T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "买了《SQL 反模式》技术书，75 元，用当当支付。",
+      "created_at": "2025-08-10T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 Python 装饰器并手写计时器，学习 30 分钟。",
+      "created_at": "2025-08-11T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "午餐轻食沙拉 32 元，支付宝支付。",
+      "created_at": "2025-08-12T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天练习英语六级翻译，重点传统文化词，学习 45 分钟。",
+      "created_at": "2025-08-13T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "下雨打车回家，24.5 元，用滴滴。",
+      "created_at": "2025-08-14T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语六级真题，阅读满分，学习 90 分钟。",
+      "created_at": "2025-08-15T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "和朋友玩桌游局，花费 60 元。",
+      "created_at": "2025-08-16T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做 SQL 问数项目复盘，重点白名单安全，学习 60 分钟。",
+      "created_at": "2025-08-17T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "早餐饭团 8 元，微信支付。",
+      "created_at": "2025-08-18T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习上下文管理器 __enter__/__exit__，学习 45 分钟。",
+      "created_at": "2025-08-19T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天做英语口语模考 30 分钟，流利度比上次提升。",
+      "created_at": "2025-08-20T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "今天看《奥本海默》，评分 8.9，短评：普罗米修斯的火。",
+      "created_at": "2025-08-20T10:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "交 8 月房租 2400 元，银行转账。",
+      "created_at": "2025-08-21T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 SQLite 时间函数，date/week 的用法，学习 40 分钟。",
+      "created_at": "2025-08-21T10:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 FastAPI SSE：客户端 fetch ReadableStream 解析。",
+      "created_at": "2025-08-22T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "今天看《你的名字。》，评分 8.5，短评：黄昏之时。",
+      "created_at": "2025-08-22T10:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 httpx 客户端重试机制，重点指数退避。",
+      "created_at": "2025-08-23T09:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "life",
+      "content": "晚餐烧烤 88 元，微信支付，朋友聚餐。",
+      "created_at": "2025-08-23T10:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "今天复习 Python 生成器：惰性求值。",
+      "created_at": "2025-08-23T11:00:00+00:00"
+    },
+    {
+      "role": "user",
+      "session_id": "study",
+      "content": "本周复盘：SQL 学习 140 分钟，Python 学习 125 分钟。",
+      "created_at": "2025-08-24T09:00:00+00:00"
+    }
+  ],
+  "kv_memories": [
+    {
+      "key": "最喜欢的咖啡馆",
+      "value": "Manner 咖啡，常点冰拿铁",
+      "category": "偏好",
+      "weight": 5.0,
+      "updated_at": "2025-08-20T08:00:00+00:00"
+    },
+    {
+      "key": "健身目标",
+      "value": "2025 年底体脂率降到 18%",
+      "category": "目标",
+      "weight": 4.0,
+      "updated_at": "2025-08-18T08:00:00+00:00"
+    },
+    {
+      "key": "旅行愿望",
+      "value": "明年想去日本京都看红叶",
+      "category": "愿望",
+      "weight": 4.0,
+      "updated_at": "2025-08-15T08:00:00+00:00"
+    },
+    {
+      "key": "工资卡",
+      "value": "工资卡是招商银行尾号 8848",
+      "category": "财务",
+      "weight": 5.0,
+      "updated_at": "2025-08-12T08:00:00+00:00"
+    },
+    {
+      "key": "过敏原",
+      "value": "对花生过敏，点餐必须避开花生",
+      "category": "健康",
+      "weight": 5.0,
+      "updated_at": "2025-08-10T08:00:00+00:00"
+    },
+    {
+      "key": "GitHub 账号",
+      "value": "GitHub 用户名是 hujiao-dev",
+      "category": "账号",
+      "weight": 4.0,
+      "updated_at": "2025-08-08T08:00:00+00:00"
+    },
+    {
+      "key": "会议习惯",
+      "value": "每周一上午 10 点站会",
+      "category": "工作",
+      "weight": 4.0,
+      "updated_at": "2025-08-05T08:00:00+00:00"
+    },
+    {
+      "key": "读书目标",
+      "value": "2025 年要读完 24 本书，目前 17 本",
+      "category": "目标",
+      "weight": 3.0,
+      "updated_at": "2025-08-01T08:00:00+00:00"
+    }
+  ],
+  "questions": [
+    {
+      "id": "m001",
+      "category": "recent",
+      "question": "我最近买的《SQL 反模式》花了多少钱，用什么支付？",
+      "reference_points": [
+        {
+          "point": "《SQL 反模式》75 元，用当当支付",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "《SQL 反模式》技术书，75 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m002",
+      "category": "recent",
+      "question": "我 8 月 11 日复习装饰器练了什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "8 月 11 日复习 Python 装饰器并手写计时器，学习 30 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "复习 Python 装饰器并手写计时器，学习 30 分钟"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m003",
+      "category": "recent",
+      "question": "我 8 月 12 日午餐吃了什么，花了多少钱？",
+      "reference_points": [
+        {
+          "point": "午餐轻食沙拉 32 元，支付宝支付",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "午餐轻食沙拉 32 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m004",
+      "category": "recent",
+      "question": "我 8 月 13 日练习六级翻译的重点是什么？",
+      "reference_points": [
+        {
+          "point": "8 月 13 日练习英语六级翻译，重点传统文化词",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "练习英语六级翻译，重点传统文化词"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m005",
+      "category": "recent",
+      "question": "8 月 14 日下雨天我怎么回家的，花了多少钱？",
+      "reference_points": [
+        {
+          "point": "下雨打车回家，24.5 元，用滴滴",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "下雨打车回家，24.5 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m006",
+      "category": "recent",
+      "question": "我 8 月 15 日做六级真题阅读成绩如何，学了多久？",
+      "reference_points": [
+        {
+          "point": "英语六级真题阅读满分，学习 90 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "六级真题，阅读满分"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m007",
+      "category": "recent",
+      "question": "我 8 月 16 日玩了什么，花了多少钱？",
+      "reference_points": [
+        {
+          "point": "和朋友玩桌游局，花费 60 元",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "玩桌游局，花费 60 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m008",
+      "category": "recent",
+      "question": "我 8 月 17 日做的 SQL 复盘重点是什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "SQL 问数项目复盘重点白名单安全，学习 60 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "问数项目复盘，重点白名单安全"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m009",
+      "category": "recent",
+      "question": "我 8 月 18 日早餐吃了什么，怎么付的钱？",
+      "reference_points": [
+        {
+          "point": "早餐饭团 8 元，微信支付",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "早餐饭团 8 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m010",
+      "category": "recent",
+      "question": "我 8 月 19 日复习上下文管理器学了多久？",
+      "reference_points": [
+        {
+          "point": "复习上下文管理器 __enter__/__exit__，学习 45 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "复习上下文管理器 __enter__/__exit__"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m011",
+      "category": "recent",
+      "question": "我 8 月 20 日口语模考表现怎么样？",
+      "reference_points": [
+        {
+          "point": "英语口语模考 30 分钟，流利度比上次提升",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "口语模考 30 分钟，流利度比上次提升"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m012",
+      "category": "recent",
+      "question": "我最近看的《奥本海默》评分和短评是什么？",
+      "reference_points": [
+        {
+          "point": "《奥本海默》评分 8.9，短评：普罗米修斯的火",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "《奥本海默》，评分 8.9，短评：普罗米修斯的火"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m013",
+      "category": "recent",
+      "question": "我 8 月房租交了多少，怎么付的？",
+      "reference_points": [
+        {
+          "point": "8 月房租 2400 元，银行转账",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "8 月房租 2400 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m014",
+      "category": "recent",
+      "question": "我 8 月 21 日复习的 SQLite 时间函数学了多久？",
+      "reference_points": [
+        {
+          "point": "复习 SQLite 时间函数 date/week 用法，学习 40 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "复习 SQLite 时间函数，date/week 的用法"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m015",
+      "category": "recent",
+      "question": "我最近看的《你的名字。》评分和短评是什么？",
+      "reference_points": [
+        {
+          "point": "《你的名字。》评分 8.5，短评：黄昏之时",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "《你的名字。》，评分 8.5，短评：黄昏之时"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m016",
+      "category": "recent",
+      "question": "我 8 月 23 日复习 httpx 的重点是什么？",
+      "reference_points": [
+        {
+          "point": "复习 httpx 客户端重试机制，重点指数退避",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "复习 httpx 客户端重试机制，重点指数退避"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m017",
+      "category": "recent",
+      "question": "我 8 月 23 日晚上吃了什么，花了多少钱？",
+      "reference_points": [
+        {
+          "point": "晚餐烧烤 88 元，微信支付",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "晚餐烧烤 88 元"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m018",
+      "category": "recent",
+      "question": "我 8 月 24 日复盘里 SQL 和 Python 各学了多少分钟？",
+      "reference_points": [
+        {
+          "point": "本周 SQL 学习 140 分钟，Python 学习 125 分钟",
+          "evidence": [
+            "window"
+          ],
+          "evidence_texts": [
+            "SQL 学习 140 分钟，Python 学习 125 分钟"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m019",
+      "category": "summary_only",
+      "question": "我 6 月 2 日学的装饰器包含哪些内容，学了多久？",
+      "reference_points": [
+        {
+          "point": "Python 装饰器：闭包 + @wraps，练习手写计时器，学习 45 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "闭包 + @wraps"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m020",
+      "category": "summary_only",
+      "question": "我 6 月 3 日学的 SQL 聚合重点是什么？",
+      "reference_points": [
+        {
+          "point": "SQL SELECT 与聚合，重点 GROUP BY 执行顺序，学习 50 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "GROUP BY 执行顺序"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m021",
+      "category": "summary_only",
+      "question": "我 6 月 5 日六级阅读错了几道，问题在哪？",
+      "reference_points": [
+        {
+          "point": "六级阅读错 2 道，主要问题是长难句",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "错 2 道，主要问题是长难句"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m022",
+      "category": "summary_only",
+      "question": "我 6 月 7 日学的生成器核心概念是什么？",
+      "reference_points": [
+        {
+          "point": "Python 生成器与 yield 的惰性求值，学习 60 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "生成器与 yield 的惰性求值"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m023",
+      "category": "summary_only",
+      "question": "我 6 月 9 日概率论刷题覆盖哪一章，刷了多久？",
+      "reference_points": [
+        {
+          "point": "概率论刷题 80 分钟，覆盖期望值章节",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "期望值章节"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m024",
+      "category": "summary_only",
+      "question": "我 6 月 11 日 SQL JOIN 练习了多久，重点是什么？",
+      "reference_points": [
+        {
+          "point": "SQL JOIN 练习 55 分钟，重点内连接与外连接",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "内连接与外连接"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m025",
+      "category": "summary_only",
+      "question": "我 6 月 13 日学的 FastAPI 内容是什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "FastAPI 路由与依赖注入，学习 65 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "FastAPI 路由与依赖注入"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m026",
+      "category": "summary_only",
+      "question": "我 6 月 15 日线性代数学了什么？",
+      "reference_points": [
+        {
+          "point": "线性代数特征值，学习 60 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "线性代数特征值"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m027",
+      "category": "summary_only",
+      "question": "我 6 月 17 日口语跟读练了多久，重点是什么？",
+      "reference_points": [
+        {
+          "point": "英语口语跟读 25 分钟，重点是连读弱读",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "连读弱读"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m028",
+      "category": "summary_only",
+      "question": "我 6 月 19 日 pytest 学了什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "pytest fixture 作用域，学习 90 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "fixture 作用域"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m029",
+      "category": "summary_only",
+      "question": "我 6 月 21 日 SQLite 学了什么安全内容？",
+      "reference_points": [
+        {
+          "point": "SQLite 只读连接与白名单，学习 80 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "只读连接与白名单"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m030",
+      "category": "summary_only",
+      "question": "我 6 月 23 日窗口函数练了什么？",
+      "reference_points": [
+        {
+          "point": "SQL 窗口函数，练习 ROW_NUMBER 排名，学习 75 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "ROW_NUMBER 排名"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m031",
+      "category": "summary_only",
+      "question": "我 6 月 25 日读 httpx 源码的重点是什么？",
+      "reference_points": [
+        {
+          "point": "阅读 httpx 源码，重点超时与重试实现，学习 50 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "阅读 httpx 源码"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m032",
+      "category": "summary_only",
+      "question": "我 6 月 27 日学的类型标注内容是什么？",
+      "reference_points": [
+        {
+          "point": "类型标注与 typing 模块，学习 55 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "类型标注与 typing 模块"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m033",
+      "category": "summary_only",
+      "question": "我 6 月 29 日上下文管理器学了什么？",
+      "reference_points": [
+        {
+          "point": "上下文管理器的异常安全，学习 45 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "上下文管理器的异常安全"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m034",
+      "category": "summary_only",
+      "question": "我 7 月 1 日递归 CTE 练了什么场景？",
+      "reference_points": [
+        {
+          "point": "递归 CTE，练习组织树查询，学习 60 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "组织树查询"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m035",
+      "category": "summary_only",
+      "question": "我 7 月 3 日 SQLite 时间函数学了什么？",
+      "reference_points": [
+        {
+          "point": "SQLite 时间函数入门：date/week 用法，学习 40 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "时间函数入门"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m036",
+      "category": "summary_only",
+      "question": "我 7 月 5 日概率论错题重点是什么？",
+      "reference_points": [
+        {
+          "point": "概率论错题本，重点条件概率，学习 70 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "条件概率"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m037",
+      "category": "summary_only",
+      "question": "我 7 月 7 日 FastAPI 学了什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "FastAPI 流式 SSE 的实现，学习 65 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "流式 SSE 的实现"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m038",
+      "category": "summary_only",
+      "question": "我 7 月 9 日英语六级听力弱项是什么？",
+      "reference_points": [
+        {
+          "point": "英语六级听力，新闻题弱，学习 35 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "新闻题弱"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m039",
+      "category": "summary_only",
+      "question": "我 7 月 11 日 SQL 索引学了什么，学了多久？",
+      "reference_points": [
+        {
+          "point": "SQL 索引与 EXPLAIN 执行计划，学习 55 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "EXPLAIN 执行计划"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m040",
+      "category": "summary_only",
+      "question": "我 7 月 17 日问数项目复盘重点是什么？",
+      "reference_points": [
+        {
+          "point": "SQL 问数项目复盘，重点 SQL 白名单安全，学习 60 分钟",
+          "evidence": [
+            "summary"
+          ],
+          "evidence_texts": [
+            "SQL 白名单安全"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full",
+        "window_summary"
+      ]
+    },
+    {
+      "id": "m041",
+      "category": "kv_only",
+      "question": "我最喜欢的咖啡馆是哪家，常点什么？",
+      "reference_points": [
+        {
+          "point": "最喜欢的咖啡馆是 Manner 咖啡，常点冰拿铁",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "Manner 咖啡，常点冰拿铁"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m042",
+      "category": "kv_only",
+      "question": "我 2025 年底的健身目标是什么？",
+      "reference_points": [
+        {
+          "point": "2025 年底体脂率降到 18%",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "体脂率降到 18%"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m043",
+      "category": "kv_only",
+      "question": "我明年的旅行愿望是什么？",
+      "reference_points": [
+        {
+          "point": "明年想去日本京都看红叶",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "京都看红叶"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m044",
+      "category": "kv_only",
+      "question": "我的工资卡是哪家银行，尾号多少？",
+      "reference_points": [
+        {
+          "point": "工资卡是招商银行尾号 8848",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "招商银行尾号 8848"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m045",
+      "category": "kv_only",
+      "question": "我对什么食物过敏？",
+      "reference_points": [
+        {
+          "point": "对花生过敏，点餐必须避开花生",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "对花生过敏"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m046",
+      "category": "kv_only",
+      "question": "我的 GitHub 用户名是什么？",
+      "reference_points": [
+        {
+          "point": "GitHub 用户名是 hujiao-dev",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "hujiao-dev"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m047",
+      "category": "kv_only",
+      "question": "我每周的站会是什么时间？",
+      "reference_points": [
+        {
+          "point": "每周一上午 10 点站会",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "每周一上午 10 点站会"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m048",
+      "category": "kv_only",
+      "question": "我 2025 年的读书目标是什么，进度如何？",
+      "reference_points": [
+        {
+          "point": "2025 年要读完 24 本书，目前 17 本",
+          "evidence": [
+            "kv"
+          ],
+          "evidence_texts": [
+            "读完 24 本书，目前 17 本"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m049",
+      "category": "cross",
+      "question": "我 6 月初学装饰器那段时间，最常去的咖啡馆和常点单品是什么？",
+      "reference_points": [
+        {
+          "point": "学闭包 + @wraps 期间常去 Manner 咖啡，常点冰拿铁",
+          "evidence": [
+            "summary",
+            "kv"
+          ],
+          "evidence_texts": [
+            "闭包 + @wraps",
+            "Manner 咖啡，常点冰拿铁"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m050",
+      "category": "cross",
+      "question": "我 8 月 11 日复习装饰器时，最喜欢的咖啡馆是哪家？",
+      "reference_points": [
+        {
+          "point": "8 月 11 日复习装饰器时常去 Manner 咖啡，点冰拿铁",
+          "evidence": [
+            "window",
+            "kv"
+          ],
+          "evidence_texts": [
+            "复习 Python 装饰器并手写计时器",
+            "Manner 咖啡，常点冰拿铁"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m051",
+      "category": "cross",
+      "question": "我 7 月学 SQLite 只读连接时，年底健身目标是什么？",
+      "reference_points": [
+        {
+          "point": "学只读连接与白名单时，目标是体脂率降到 18%",
+          "evidence": [
+            "summary",
+            "kv"
+          ],
+          "evidence_texts": [
+            "只读连接与白名单",
+            "体脂率降到 18%"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m052",
+      "category": "cross",
+      "question": "我 8 月 20 日看完《奥本海默》后，明年的旅行愿望是什么？",
+      "reference_points": [
+        {
+          "point": "看完《奥本海默》后，计划明年去日本京都看红叶",
+          "evidence": [
+            "window",
+            "kv"
+          ],
+          "evidence_texts": [
+            "《奥本海默》",
+            "京都看红叶"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m053",
+      "category": "cross",
+      "question": "从 6 月学 FastAPI 依赖注入到 8 月复习 FastAPI SSE，我最喜欢的咖啡馆是哪家？",
+      "reference_points": [
+        {
+          "point": "从依赖注入到复习 FastAPI SSE，常喝 Manner 冰拿铁",
+          "evidence": [
+            "summary",
+            "window",
+            "kv"
+          ],
+          "evidence_texts": [
+            "依赖注入",
+            "复习 FastAPI SSE",
+            "Manner 咖啡"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m054",
+      "category": "cross",
+      "question": "我 6 月练习 pytest fixture 时，工资卡是哪个银行？",
+      "reference_points": [
+        {
+          "point": "练 fixture 时工资卡是招商银行尾号 8848",
+          "evidence": [
+            "summary",
+            "kv"
+          ],
+          "evidence_texts": [
+            "fixture 作用域",
+            "招商银行尾号 8848"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m055",
+      "category": "cross",
+      "question": "我 8 月 23 日复习 httpx 重试机制后，记得自己对什么过敏？",
+      "reference_points": [
+        {
+          "point": "复习指数退避时记得对花生过敏",
+          "evidence": [
+            "window",
+            "kv"
+          ],
+          "evidence_texts": [
+            "指数退避",
+            "对花生过敏"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    },
+    {
+      "id": "m056",
+      "category": "cross",
+      "question": "我 7 月练英语听力时，之后定的读书目标是什么？",
+      "reference_points": [
+        {
+          "point": "练新闻题时计划 2025 年读完 24 本书",
+          "evidence": [
+            "summary",
+            "kv"
+          ],
+          "evidence_texts": [
+            "新闻题弱",
+            "读完 24 本书"
+          ]
+        }
+      ],
+      "expected_strategies": [
+        "full"
+      ]
+    }
+  ]
+}

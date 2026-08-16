@@ -1,7 +1,7 @@
 # Personal Data Assistant 架构设计文档
 
-- 版本：v0.4（M4 评审修订：FastAPI 接口、SSE 流式、极简页面与 SQLite 线程安全定稿）
-- 状态：已确认；作为 M5 的实现依据
+- 版本：v0.5（M5 评审定稿：离线评测体系、指标口径、汇总报告与 README 最终版）
+- 状态：已确认；M0~M5 全部完成，后续只做增量维护
 - 约束：Python 3.10+（开发机 3.10.12 + uv；见 PROGRESS「环境决策」）；
   不用 LangChain 与重量级框架；模型走 DeepSeek API（OpenAI 兼容）；核心机制全部手写
 
@@ -172,8 +172,10 @@ M0 只设计不建表；M2/M3 由各自的迁移测试先锁行为，再写实�
 - M3 已实现：问数别名不新建表，复用 `kv_memories`（key=`sql_alias:<用户说法>`、
   value=标准说法、category=`sql_alias`、weight=置信度）；原规划的
   `user_aliases`/`user_profile` 独立表留作后续画像扩展。
-- M5 规划：`eval_runs(run_id, strategy, question_id, answer, judge, tokens,
-  cost, latency_ms)`
+- M5 定稿：不新增业务表。评测题集以 JSON 为唯一题源，运行结果写
+  `evals/reports/memory_eval_results.json` 与 `evals/reports/sql_eval_results.json`，
+  汇总报告写 `evals/reports/M5-eval.md`；`eval_runs` 表推迟到需要网页展示
+  历史评测趋势时再加。
 - `embeddings(...)` 暂不建表：M2 检索定稿为 KV 时间衰减，向量是后续增强通道。
 
 ### 4.3 取舍
@@ -198,7 +200,9 @@ data-assistant/
 ├── .gitignore                        ✅ 忽略 .env、缓存、数据文件
 ├── .env.example                      ✅ 环境变量模板（不含真实密钥）
 ├── docs/
-│   └── architecture.md               ✅ 本架构文档
+│   ├── architecture.md               ✅ 本架构文档（v0.5）
+│   ├── reproduce/                    ✅ M0~M5 复现指南
+│   └── assets/                       ✅ 演示动图/截图占位说明
 ├── src/personal_data_assistant/
 │   ├── .gitkeep                      ✅ M0 占位（保留兼容 M0 契约）
 │   ├── config.py                     ✅ M1 配置与默认值（M2 记忆 + M3 问数默认值）
@@ -255,17 +259,24 @@ data-assistant/
 │   ├── test_integration_sql.py        ✅ M3 真实 API 冒烟（默认跳过）
 │   ├── test_api.py                     ✅ M4 路由/SSE/超时/统一错误（fake 模型）
 │   ├── test_frontend.py                ✅ M4 单页端到端契约
-│   └── test_evals.py                    M5
+│   └── test_evals.py                    ✅ M5 题集契约/判分/指标聚合
 ├── data/
 │   ├── .gitkeep                      ✅ 数据目录占位
 │   └── README.md                      ✅ M2/M3 数据文件说明
 └── evals/
     ├── .gitkeep                      ✅ 评测目录占位
-    ├── questions/memory_50.json         M5 50 道记忆问答
-    ├── questions/sql_questions.json     M5 SQL 题集
-    ├── run_memory_eval.py               M5 记忆策略对比
-    ├── run_sql_eval.py                  M5 SQL 准确率
-    └── reports/                         M5 评测报告
+    ├── questions/memory_50.json      ✅ M5 56 道记忆问答 + 参考要点 + 固定素材
+    ├── questions/sql_questions.json  ✅ M5 25 道问数题（含 5 道陷阱题）
+    ├── memory_eval.py                ✅ M5 记忆 runner/判分/成本聚合
+    ├── sql_eval.py                   ✅ M5 SQL runner/行集判分/快照校验
+    ├── reporting.py                  ✅ M5 markdown 报告生成
+    ├── run_memory_eval.py            ✅ M5 记忆评测 CLI
+    ├── run_sql_eval.py               ✅ M5 SQL 评测 CLI
+    ├── run_all_evals.py              ✅ M5 一键复现入口
+    └── reports/
+        ├── memory_eval_results.json  ✅ M5 记忆评测原始结果
+        ├── sql_eval_results.json     ✅ M5 SQL 评测原始结果
+        └── M5-eval.md                ✅ M5 汇总报告
 ```
 
 ---
@@ -342,6 +353,22 @@ data-assistant/
 
 ---
 
+### 5.5 M5 评测体系（已实现）
+
+- 题集：记忆 56 道（时间/主题/数字细节/跨素材综合），SQL 25 道（含 5 道陷阱题：
+  非只读、表不存在、时间跨度越界、歧义列、字段名陷阱）；全部在 `evals/questions/`。
+- 记忆评测：每道题用 M2 `replay_memory_strategies()` 重新喂入同一批对话，四策略
+  独立 SQLite 重放；答题阶段走 M1 `run_tool_loop()`。离线默认用确定性
+  `ContextOracleAnswerModel` + 规则判分（要点全覆盖才算命中），因此指标是
+  “检索完备性上界”；真实 DeepSeek 与 LLM-as-judge 作为可选增强，不阻塞验收。
+- SQL 评测：每道题跑独立临时演示库，`ScriptedSQLModel` 按题集 JSON 脚本化输出；
+  判分用行集比对（排序 + 浮点容差 1e-4）。非只读陷阱额外做 before/after 全库
+  快照，证明数据一个字节未变。
+- 指标口径：SQL 首轮成功率 = 首次执行即成功题数 / 总题数；修正成功率 = 修正成功
+  题数 / 需要修正题数；平均修正轮数 = Σ total_fix_rounds / 总题数。
+- 输出：`evals/reports/memory_eval_results.json`、`evals/reports/sql_eval_results.json`
+  + `evals/reports/M5-eval.md`；一键命令 `PYTHONPATH= .venv/bin/python evals/run_all_evals.py`。
+
 ## 降级与 B 计划
 
 总原则：**任何对外调用失败都有下一手；再失败就给结构化中文错误，绝不崩溃。**
@@ -365,34 +392,30 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
 
 ## 评测方案
 
-### 6.1 记忆问答评测（M5）
+### 6.1 记忆问答评测（M5，已跑通）
 
-- 题集：`evals/questions/memory_50.json`，50 道中文问题，覆盖时间（“上周学了
-  什么”）、主题（“关于 XX 的笔记”）、数字细节、跨素材综合；每题带参考答案关键点。
-- 喂入固定素材包（同一批文章/笔记/聊天，固定顺序），保证可复现。
-- 四种策略对比（`memory.models.MemoryStrategy`，已可重放）：
-  - S0 无记忆（不注入任何上下文，作为最下界）
-  - S1 仅滑动窗口（窗口外内容必须答不出）
-  - S2 滑动窗口 + 会话/日/周分层摘要
-  - S3 完整系统：滑动窗口 + 分层摘要 + KV 长期记忆时间衰减检索（生产默认 full）
-- 指标：
-  1. 准确率：答案关键点覆盖率。主判分用 DeepSeek 固定 prompt 做 LLM-as-judge，
-     同时提供规则判分脚本（关键词 + 数字匹配）兜底，避免“模型给自己打分”的偏差。
-  2. 成本：每题输入/输出 token、检索注入 token、估算费用；汇总四种策略总成本。
-  3. 召回：长期记忆检索命中率（应命中的题是否进了 top-k）。
-  4. 延迟与重试次数。
-- 输出：`evals/reports/memory_*.json` + 一张四策略对比表。
-- 成本控制：DeepSeek 单题成本低；评测先跑小样本（10 题）验证流程，再跑全量；
-  失败重试计入重试次数，不无限烧钱。
+- 题集：`evals/questions/memory_50.json`，实际 56 道中文问题，覆盖近期窗口、
+  旧消息摘要、纯长期记忆、跨通道综合四类；每题带参考答案要点与预期命中策略。
+- 喂入固定素材包：48 条消息（最近 20 条在 window 内）+ 8 条 KV 长期记忆，固定
+  顺序与固定评测时钟 `2025-08-24T12:00Z`，保证可复现。
+- 四种策略对比：none / window / window_summary / full，全部走
+  `replay_memory_strategies`。
+- 已产出指标（离线确定性模式）：
+  - 命中率：none 0/56、window 18/56（32.14%）、window_summary 40/56（71.43%）、
+    full 56/56（100%）。
+  - token 成本：none 16,769 / window 39,932 / window_summary 348,171 /
+    full 353,086（答题阶段估算，¥0.04~0.71）。
+- 输出：`evals/reports/memory_eval_results.json` + 报告中的四策略对比表。
 
-### 6.2 SQL 准确率评测（M5）
+### 6.2 SQL 准确率评测（M5，已跑通）
 
-- 题集：`evals/questions/sql_questions.json`，每条含问题、表结构定义、标准答案
-  （结果行集或聚合数值 + 浮点容差）、禁止事项（如禁止写库）。
-- 指标：首次 SQL 可执行率、结果一致率、错误后自动修正成功率、平均修正轮数、
-  token 成本；另设 5 道陷阱题（问法歧义、字段名陷阱），单独报告。
-- 判分：执行结果与标准答案做行集比对（排序、浮点容差 1e-6）；每道题都跑在
-  全新的临时 SQLite 测试库上，保证可复现。
+- 题集：`evals/questions/sql_questions.json`，25 道问数题；其中 5 道陷阱题为
+  非只读 DELETE、表不存在、时间跨度越界、歧义列、字段名陷阱。
+- 指标（fake `ScriptedSQLModel`，全部可重复）：结果一致率 100%（25/25）、
+  首次成功率 76%（19/25）、修正成功率 100%（6/6）、平均修正轮数 0.24、
+  总 token 31,157、估算费用 ¥0.0685。
+- 判分：执行结果与标准答案做行集比对（排序、浮点容差 1e-4）；每道题都跑在
+  全新的临时 SQLite 演示库上，并对非只读陷阱做 before/after 全库快照。
 
 ### 6.3 评测与开发的关系
 
@@ -411,7 +434,7 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
    `profile`（已完成；红阶段 6 个 collection error，终态 159 passed, 5 deselected）。
 5. M4：先写 FastAPI TestClient 测试 → 实现路由与极简页面（已完成；红阶段
    2 个 collection error，终态 172 passed, 5 deselected）。
-6. M5：先写题集校验与判分测试 → 跑评测 → 写完整 README。
+6. M5：先写题集校验与判分测试 → 实现 evals runner/reporting → 跑离线评测 → 写完整 README（已完成；红阶段 1 个 collection error，终态 179 passed, 5 deselected）。
 
 每个里程碑结束都更新 `PROGRESS.md` 并停下来汇报，等确认后再继续。
 
@@ -440,6 +463,10 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
   手写解析；`/ask` 流式时在 API 层用增量状态机把工具调用 JSON 折进 `tool`
   事件。理由：EventSource 不能带 POST body，引入 Node 工具链会破坏“极简 + 可
   离线复现”的约束；折叠逻辑放 API 层，前端只消费三种稳定事件。
+- ADR-9：M5 默认评测全部离线 fake 化（记忆 oracle + SQL 脚本模型 + 规则/行集
+  判分），真实 DeepSeek 与 LLM-as-judge 作为可选增强。理由：评测必须像单元
+  测试一样可重复、零成本、不依赖密钥；真实模型接入时只替换 model 工厂，题集、
+  判分与聚合逻辑不变。记忆离线指标明确标注为“检索完备性上界”。
 
 ---
 

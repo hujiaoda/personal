@@ -494,3 +494,126 @@
 8. 更新 README、architecture.md（v0.4/5.4/目录标 ✅/ADR-8）、
    `docs/reproduce/M4-web.md`、`docs/reproduce/README.md`、本文件；
    停下汇报，等确认后再进 M5。
+
+---
+
+## M5 评测体系（记忆四策略重放 + SQL 准确率/修正指标 + 汇总报告 + README 最终版）
+
+### 进度
+
+- 严格 TDD：先写 `tests/test_evals.py` 锁题集契约、判分算法与报告结构；
+  红阶段为 **1 个 collection error**（`No module named 'evals.memory_eval'`），
+  与 M1~M4 的红阶段形态一致。实现后 7 项全绿。
+- 新增 `evals/` 评测包（不 import 业务内部实现，只走公开协议）：
+  - `questions/memory_50.json`：**56 道**中文记忆问答（recent 18 /
+    summary_only 22 / kv_only 8 / cross 8），每题含参考答案要点
+    `reference_points`（point + evidence 通道 + evidence_texts 原文证据）与
+    `expected_strategies`；素材为 48 条固定消息（最近 20 条在窗口内）+ 8 条
+    KV 长期记忆，评测时钟固定 `2025-08-24T12:00Z`。
+  - `questions/sql_questions.json`：**25 道**问数题（20 常规 + 5 陷阱），
+    陷阱类型为非只读 DELETE、表不存在、时间跨度越界、歧义列、字段名陷阱；
+    每题写死 `first_sql` / `fix_sqls` / `explanation` / `expected_rows`，
+    fake 模型完全可复现。
+  - `memory_eval.py`：每道题调 M2 `replay_memory_strategies()` 重放四种策略；
+    `PreservingSummaryModel` 保证旧消息事实进摘要通道；
+    `ContextOracleAnswerModel` 只从上下文块找证据并按 M1 JSON 动作协议作答；
+    答题走 `run_tool_loop`；规则判分“参考要点全覆盖才算命中”；聚合命中率、
+    要点覆盖率、上下文 token、prompt/completion token 与估算费用。
+  - `sql_eval.py`：`ScriptedSQLModel` 按提示词标记区分“首次生成 / 失败修正 /
+    结果解释”；每道题独立 `build_demo_tables` 临时库；`rows_equal` 行集比对
+    （排序 + 浮点容差 1e-4）；非只读陷阱做 before/after 全库快照；聚合
+    首次成功率、修正成功率、平均修正轮数、结果一致率与 token 成本。
+  - `reporting.py` + `run_memory_eval.py` / `run_sql_eval.py` /
+    `run_all_evals.py`：一键产出 JSON + `evals/reports/M5-eval.md`。
+- 实测指标（离线 fake 模式，可逐次复现）：
+  - 记忆命中率：none **0/56（0%）**、window **18/56（32.14%）**、
+    window_summary **40/56（71.43%）**、full **56/56（100%）**；
+    答题 token：none 16,769 / window 39,932 / window_summary 348,171 /
+    full 353,086；估算费用 ¥0.0419 / ¥0.0880 / ¥0.7042 / ¥0.7136。
+  - SQL：结果一致率 **25/25（100%）**、首次成功率 **19/25（76%）**、
+    修正成功率 **6/6（100%）**、平均修正轮数 **0.24**、总 token 31,157、
+    估算费用 ¥0.0685；非只读陷阱快照证明数据未变。
+- README 重写为最终版：项目介绍、mermaid 架构图、快速开始（含 M5 评测命令）、
+  演示动图/截图占位（`docs/assets/README.md`）、里程碑与指标总表、五段
+  面试指向设计取舍（新增“为什么 M5 评测默认全部 fake”）。
+- 文档：`docs/architecture.md` 修订 v0.5（5.5 评测体系、6.1/6.2 改为已跑通
+  指标、目录/测试标 ✅、ADR-9 离线评测定稿）；新增
+  `docs/reproduce/M5-eval.md`（核心概念 7 条/数据流/复现步骤/自测 5 题/
+  面试预演 5 题）；`docs/reproduce/README.md` 标 M0~M5 全部生成。
+- 测试结果：`PYTHONPATH= .venv/bin/python -m pytest` → **179 passed,
+  5 deselected**；`-m integration` 无密钥 → **5 skipped**（2 M1 + 2 M2 +
+  1 M3，M4/M5 全 fake 不新增 integration）。
+- 一键评测：`PYTHONPATH= .venv/bin/python evals/run_all_evals.py` →
+  `evals/reports/{memory_eval_results,sql_eval_results}.json` +
+  `evals/reports/M5-eval.md`，总耗时约 2s，零 API 费用。
+
+### 踩过的坑
+
+1. **旧事实与近期事实的 evidence 原文不能重叠**：如果“summary_only”题的证据
+   短语（如“惰性求值”“__enter__/__exit__”）也出现在最近 20 条窗口消息里，
+   window 策略会“作弊”命中，四策略对比曲线失真。生成题集前必须按时间排序
+   数出窗口边界，为旧题挑近期消息里不存在的专属短语（“闭包 + @wraps”可以，
+   “手写计时器”不行，因为旧新两条消息都有）。
+2. **oracle 必须只搜上下文块，不能搜整条 user 消息**：`augment_question` 的
+   拼装文本同时包含问题和上下文；如果拿整条消息做 `evidence_texts` 子串匹配，
+   题目里自带的关键词会让 none 策略混到分数。正确做法是先按
+   `“以下是记忆系统提供的上下文…”` 与 `“用户问题：”` 切出中段，none 无上下文
+   自然返回空串。
+3. **runner 的 meta 里别把 `now_fn` lambda 原样塞进 JSON**：第一次跑 CLI 在
+   `json.dumps` 处直接 `TypeError: Object of type function is not JSON
+   serializable`。运行参数与可序列化配置要分开：内部用 lambda 控制重放时钟，
+   输出时只写 `now` 的 ISO 字符串。
+4. **`rows_equal` 排序时，混合类型行直接用 tuple 比较会 TypeError**：SQLite
+   同列值类型一致时没事，但 UNION 出来的行可能第一行数字、第二行字符串。
+   先把每格归一成 `"num"` 或字符串，再按整行 JSON 字符串排序，最后逐格比较；
+   数值格用 `math.isclose(abs_tol=1e-4, rel_tol=1e-4)`，字符串格转 str 比较。
+5. **`ScriptedSQLModel` 要靠 prompt 标记而不是调用次数猜阶段**：`data.ask`
+   的生成、修正、解释三类 user 消息特征分别是“请只输出 SQL”“上一次生成的
+   SQL 执行失败”“实际执行的 SQL”；用这些标记分派 `first_sql / fix_sqls /
+   explanation`，比数调用次数稳，题目后续加第二轮修正也不会错位。
+6. **SQL 陷阱题的“安全”要两层判据**：非只读题如果只看 answer 说“已拒绝”，
+   可能掩盖白名单失效后数据真被删掉的事故。评测对每道题都做 before/after
+   全库快照，表名排序 + `SELECT * ORDER BY rowid`，一个字节不同都判 false。
+7. **摘要模型“无损保留”是评测口径，不是作弊，但必须写进报告**：为了让
+   window_summary/full 的命中差异只来自通道结构，离线摘要 fake 原样保留原文；
+   这会把命中率抬到检索完备性上界。README 与报告都明确写“100% 是通道覆盖
+   上限，不是真实模型考试满分”，否则面试时会被质疑指标注水。
+8. **题集改动后必须重跑 run_all_evals 再提交报告**：`evals/reports/` 下三份
+   文件是生成物，和题集 JSON 之间没有自动校验。M5 用 `tests/test_evals.py`
+   从题集推导预期指标并锁死 runner，报告里的数字最后人工核对一遍，防止提交
+   旧报告。
+
+### 复现要点
+
+关掉代码后重写 M5，按这个顺序来：
+
+1. 读 `docs/architecture.md` 5.5/6.1/6.2/ADR-9 与
+   `docs/reproduce/M5-eval.md`；确认唯一测试命令
+   `PYTHONPATH= .venv/bin/python -m pytest`。
+2. **先写 `tests/test_evals.py`**（7 项）：记忆题集 ≥50 且要点/证据/预期策略
+   合法、SQL 题集 ≥20 且 ≥5 陷阱、记忆 runner 命中数等于题集预期且跑两次
+   一致、SQL runner 指标等于题集脚本序列且跑两次一致、非只读快照不变、
+   `rows_equal` 排序与容差、汇总报告含指标表与结论。跑测试看
+   **1 个 collection error** 红。
+3. 先做两份题集 JSON：
+   - 记忆素材 48 条消息（最近 20 条为 window），8 条 KV；56 题分 recent/
+     summary_only/kv_only/cross 四类，先按通道集合自动推导
+     `expected_strategies`；生成后手工抽查 evidence 不跨窗口泄漏。
+   - SQL 25 题直接复用 `data.demo.build_demo_tables()` 的数据；20 常规题里
+     故意安排 2 题首轮错（错列名、聚合误用），5 陷阱题里 4 题首轮错、时间
+     越界题首轮正确返回 0 行；每题把修正 SQL 与标准结果写死。
+4. 实现 `evals/` 四模块 + 三个 CLI，按依赖顺序：
+   - `memory_eval.py`：加载/Message/KV setup → 保真摘要模型 → oracle 模型 →
+     上下文切分 → `run_tool_loop` → `evaluate_answer` → 四策略聚合；
+   - `sql_eval.py`：`rows_equal` → 快照 → `ScriptedSQLModel` → 逐题
+     `ask_database` → 指标聚合；
+   - `reporting.py`：渲染 Markdown 表格与结论；
+   - CLI：直接执行时 `sys.path.insert(0, parents[1])`，保证从任意 cwd 可跑。
+5. 跑 `PYTHONPATH= .venv/bin/python -m pytest`，目标 **179 passed,
+   5 deselected**；再跑 `-m integration` 确认无密钥 **5 skipped**。
+6. 跑 `PYTHONPATH= .venv/bin/python evals/run_all_evals.py`，检查三份生成物；
+   指标应精确等于：记忆 0/18/40/56，SQL 结果一致 25、首次成功 19、
+   修正成功 6/6、avg_fix_rounds=0.24。
+7. 更新 README（最终版）、architecture.md（v0.5/5.5/ADR-9）、
+   `docs/reproduce/M5-eval.md`、`docs/reproduce/README.md`、本文件；
+   停下汇报，等最终确认。
