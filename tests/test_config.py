@@ -21,6 +21,12 @@ def test_defaults_match_architecture_document():
     assert settings.max_retries == 2
     assert settings.max_tool_rounds == 6
     assert settings.max_sql_fix_rounds == 3
+    assert settings.memory_strategy == "full"
+    assert settings.memory_window_size == 20
+    assert settings.memory_window_tokens == 8000
+    assert settings.memory_top_k == 8
+    assert settings.memory_decay_lambda == 0.05
+    assert settings.memory_db_path == "data/pda.db"
 
 
 def test_environment_variables_override_defaults():
@@ -34,6 +40,12 @@ def test_environment_variables_override_defaults():
             "PDA_MAX_RETRIES": "3",
             "PDA_MAX_TOOL_ROUNDS": "4",
             "PDA_MAX_SQL_FIX_ROUNDS": "5",
+            "PDA_MEMORY_STRATEGY": "window",
+            "PDA_MEMORY_WINDOW_SIZE": "7",
+            "PDA_MEMORY_WINDOW_TOKENS": "900",
+            "PDA_MEMORY_TOP_K": "5",
+            "PDA_MEMORY_DECAY_LAMBDA": "0.25",
+            "PDA_MEMORY_DB_PATH": "data/test-memory.db",
         }
     )
 
@@ -44,6 +56,12 @@ def test_environment_variables_override_defaults():
     assert settings.max_retries == 3
     assert settings.max_tool_rounds == 4
     assert settings.max_sql_fix_rounds == 5
+    assert settings.memory_strategy == "window"
+    assert settings.memory_window_size == 7
+    assert settings.memory_window_tokens == 900
+    assert settings.memory_top_k == 5
+    assert settings.memory_decay_lambda == 0.25
+    assert settings.memory_db_path == "data/test-memory.db"
 
 
 def test_missing_api_key_raises_config_error():
@@ -68,6 +86,22 @@ def test_invalid_retry_and_round_counts_raise_config_error():
         load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MAX_TOOL_ROUNDS": "0"})
     with pytest.raises(ConfigError):
         load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MAX_SQL_FIX_ROUNDS": "0"})
+
+
+def test_invalid_memory_strategy_raises_config_error():
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_STRATEGY": "fancy"})
+
+
+def test_invalid_memory_window_topk_and_decay_raise_config_error():
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_WINDOW_SIZE": "0"})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_WINDOW_TOKENS": "0"})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_TOP_K": "0"})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_DECAY_LAMBDA": "-1"})
 
 
 def test_settings_are_immutable_frozen_dataclass():

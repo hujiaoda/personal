@@ -1,7 +1,7 @@
 # Personal Data Assistant 架构设计文档
 
-- 版本：v0.1（M0，M1 评审时按环境决策修订）
-- 状态：已确认；作为 M1~M5 的实现依据
+- 版本：v0.2（M2 评审修订：摘要层级与长期记忆检索按 M2 范围定稿）
+- 状态：已确认；作为 M2~M5 的实现依据
 - 约束：Python 3.10+（开发机 3.10.12 + uv；见 PROGRESS「环境决策」）；
   不用 LangChain 与重量级框架；模型走 DeepSeek API（OpenAI 兼容）；核心机制全部手写
 
@@ -50,10 +50,11 @@ LangChain/LlamaIndex 等编排框架。
 | 工具协议 `tools.base` | `src/personal_data_assistant/tools/base.py` | 定义工具 schema：名称、描述、参数、执行函数；统一成功/失败回填格式 | 工具定义 → 执行结果字符串 |
 | 工具注册 `tools.registry` | `src/personal_data_assistant/tools/registry.py` | 注册/查找/列出工具；循环据此拼接可用工具说明 | 工具对象 → 描述与分派 |
 | 核心循环 `core.loop` | `src/personal_data_assistant/core/loop.py` | M1 核心：模型调用 → 解析动作 → 工具执行 → 结果回填 → 再调用模型，直到模型给出最终答案或达到最大轮数；支持流式输出 | 用户问题, 可用工具 → 最终答案, 轨迹日志 |
-| 滑动窗口 `memory.window` | `src/personal_data_assistant/memory/window.py` | 保存最近 N 条消息/素材，超窗后淘汰并触发摘要 | 消息流 → 窗口内容 |
-| 分层摘要 `memory.summarizer` | `src/personal_data_assistant/memory/summarizer.py` | 对窗口内容做层级压缩（L0 原文 → L1 段落摘要 → L2 主题摘要），旧信息只保留上层摘要 | 长文本 → 分层摘要 |
-| 长期记忆 `memory.long_term` | `src/personal_data_assistant/memory/long_term.py` | 记忆块、摘要与向量的 SQLite 持久化 | 记忆对象 → 落库 |
-| 检索 `memory.retriever` | `src/personal_data_assistant/memory/retriever.py` | 用 NumPy 手写余弦相似度取 top-k；无向量时回退关键词 | query, k → 记忆片段 |
+| 记忆模型 `memory.models` | `src/personal_data_assistant/memory/models.py` | 统一 Message/Summary/KVMemory/上下文项与策略枚举，避免包内循环 import | 数据类 → 共享协议 |
+| 滑动窗口 `memory.window` | `src/personal_data_assistant/memory/window.py` | 保存最近 N 条 / N token，超窗后淘汰并原样返回给摘要层 | 消息流 → 窗口内容 + 淘汰消息 |
+| 分层摘要 `memory.summarizer` | `src/personal_data_assistant/memory/summarizer.py` | LLM 摘要：会话级 → 日级 → 周级逐层合并；模型走 complete 鸭子协议 | 长文本 → 分层摘要 |
+| 长期记忆 `memory.long_term` | `src/personal_data_assistant/memory/long_term.py` | 会话消息、摘要、KV 长期记忆的 SQLite 持久化；KV 时间衰减检索 | 记忆对象 → 落库 / query → KV top-k |
+| 记忆编排 `memory.retriever` | `src/personal_data_assistant/memory/retriever.py` | 按策略装配窗口/摘要/KV 通道，拼上下文；支持同批对话多策略重放 | 消息流, 策略 → 检索上下文 |
 | 数据访问 `data.sqlite` | `src/personal_data_assistant/data/sqlite.py` | 只读连接管理、安全 SQL 执行、错误捕获 | SQL → 行集/错误 |
 | 表结构探查 `data.schema` | `src/personal_data_assistant/data/schema.py` | 读 `sqlite_master`，产出紧凑表结构摘要供模型使用 | 库文件 → schema 摘要 |
 | 智能问数 `data.ask` | `src/personal_data_assistant/data/ask.py` | 编排：问题 → schema → 生成 SQL → 只读执行 → 错误回填修正 → 解释结果 | 大白话, 库文件 → 答案, SQL 轨迹 |
@@ -76,31 +77,37 @@ LangChain/LlamaIndex 等编排框架。
 
 ```
 文章/笔记/聊天重点
-   │ 切块、去重（内容哈希）
    ▼
-分层摘要器：原文(窗口 L0) → L1 摘要 → L2 主题摘要
-   │
-   ├── 原文块/摘要 → SQLite memory 表
-   └── 文本 → embedding（API 成功用 API；失败降级本地 n-gram 哈希向量）
-                        │
-                        ▼
-                 向量存 SQLite，检索时 NumPy 算余弦
+消息 → SQLite messages 表 → 滑动窗口（最近 20 条或 8k token）
+   ▼ 超窗淘汰的消息不直接丢
+会话级摘要（LLM；已有会话摘要则增量更新）
+   ▼ 同一天会话都结束后
+日级摘要（合并当天会话摘要）
+   ▼ 同一 ISO 周内
+周级摘要（合并日级摘要）
+   ▼
+SQLite summaries 表（session/daily/weekly 三层）
 ```
+
+长期记忆另有一条 KV 通道：用户或应用调用 `remember(key, value)` 写入
+`kv_memories` 表；更新时间参与检索衰减。
 
 ### 3.2 记忆问答流（大白话问记忆）
 
 ```
 用户问题
    ▼
-习惯改写（“饭钱”→“餐饮”等）
+MemoryManager.retrieve(question, strategy)
+   ├─ none:           不注入任何上下文
+   ├─ window:         只注入滑动窗口近期消息
+   ├─ window_summary: 窗口消息 + 会话/日/周摘要（按层级限制条数）
+   └─ full:           窗口消息 + 分层摘要 + KV 长期记忆时间衰减 top-k
    ▼
-双通道召回：
-   A. 滑动窗口最近消息精确扫描（快，覆盖近期）
-   B. 长期记忆向量检索：embedding → NumPy 余弦 top-k（覆盖久远）
+拼接上下文（每条证据带来源标注）
    ▼
-拼接上下文（问题 + 命中的记忆片段 + 来源提示）
+augment_question 把上下文包进用户问题 → 核心循环
    ▼
-核心循环：模型阅读上下文 → 直接作答（若信息不足则说明缺什么）
+模型阅读上下文 → 直接作答（若信息不足则说明缺什么）
 ```
 
 ### 3.3 智能问数流（大白话问 SQLite 表）
@@ -149,25 +156,30 @@ M0 只设计不建表；M2/M3 由各自的迁移测试先锁行为，再写实�
 
 | 文件 | 用途 |
 | ---- | ---- |
-| `data/pda.db` | 系统记忆、摘要、向量、会话、习惯画像 |
+| `data/pda.db` | 系统记忆（消息、摘要、KV 长期记忆）、后续习惯画像 |
 | `data/user_tables.db` | 用户自己的小数据（记账、背单词等），智能问数只读访问 |
 | `evals/*.db` | 评测专用库，与真实数据物理隔离 |
 
-### 4.2 系统表（规划）
+### 4.2 系统表（M2 已落库：messages/summaries/kv_memories）
 
-- `memory_chunks(id, content_hash, content, source, created_at)`
-- `memory_summaries(id, level, parent_id, content, chunk_ids, created_at)`
-- `embeddings(id, target_kind, target_id, model, dim, vector_blob)`
-- `messages(id, session_id, role, content, tool_calls_json, token_usage, created_at)`
-- `user_aliases(id, raw_term, canonical_term, kind, weight, evidence_count, updated_at)`
-- `user_profile(key, value, updated_at)`
-- `eval_runs(run_id, strategy, question_id, answer, judge, tokens, cost, latency_ms)`
+- `messages(id, session_id, role, content, tokens, created_at)`
+- `summaries(id, level[session|daily|weekly], period_key, session_id, content,
+  source_text, source_ids, model, prompt_tokens, completion_tokens, total_tokens,
+  estimated, created_at)`
+- `kv_memories(key, value, category, weight, created_at, updated_at,
+  access_count, last_accessed_at)`
+- M3 规划：`user_aliases(id, raw_term, canonical_term, kind, weight,
+  evidence_count, updated_at)`、`user_profile(key, value, updated_at)`
+- M5 规划：`eval_runs(run_id, strategy, question_id, answer, judge, tokens,
+  cost, latency_ms)`
+- `embeddings(...)` 暂不建表：M2 检索定稿为 KV 时间衰减，向量是后续增强通道。
 
 ### 4.3 取舍
 
-- 向量以 `BLOB` 存 SQLite，不引入向量数据库：项目规模小，几千条向量用 NumPy
-  全量算余弦即可，简单且满足“手写检索”的技术要求。
-- 习惯、摘要都落 SQLite：可复现、可导出、可被评测单独打开。
+- M2 长期记忆检索用「KV + 时间衰减」，不引入 NumPy/向量库：公式是
+  `相关性 × 权重 × exp(-lambda × 年龄天数)`，离线可测、可解释；个人记忆库
+  几千条以内足够。未来要语义召回时，再给 KV 表加 embedding 列或 embeddings 表。
+- 摘要、消息、KV 都落同一个 SQLite：可复现、可导出、可被评测单独打开。
 - 用户小数据表与系统表分文件：问数工具永远拿不到系统库，避免误查和越权。
 
 ---
@@ -187,8 +199,8 @@ data-assistant/
 │   └── architecture.md               ✅ 本架构文档
 ├── src/personal_data_assistant/
 │   ├── .gitkeep                      ✅ M0 占位（保留兼容 M0 契约）
-│   ├── config.py                     ✅ M1 配置与默认值
-│   ├── app.py                           M2 起装配入口
+│   ├── config.py                     ✅ M1 配置与默认值（M2 增加记忆默认值）
+│   ├── app.py                          ✅ M2 装配入口（记忆外层组件 + 核心循环）
 │   ├── llm/
 │   │   ├── client.py                  ✅ M1 DeepSeek 客户端
 │   │   └── prompts.py                 ✅ M1 提示词模板
@@ -197,13 +209,13 @@ data-assistant/
 │   ├── tools/
 │   │   ├── base.py                    ✅ M1 工具协议
 │   │   ├── registry.py                ✅ M1 注册表
-│   │   ├── memory_tools.py              M2 记忆读写工具
 │   │   └── sql_tools.py                 M3 问数工具
 │   ├── memory/
-│   │   ├── window.py                    M2 滑动窗口
-│   │   ├── summarizer.py                M2 分层摘要
-│   │   ├── long_term.py                 M2 长期记忆
-│   │   └── retriever.py                 M2 NumPy 余弦检索
+│   │   ├── models.py                   ✅ M2 共享数据模型与策略枚举
+│   │   ├── window.py                   ✅ M2 滑动窗口
+│   │   ├── summarizer.py               ✅ M2 会话/日/周分层摘要
+│   │   ├── long_term.py                ✅ M2 SQLite 持久化 + KV 时间衰减
+│   │   └── retriever.py                ✅ M2 策略编排/上下文拼装/多策略重放
 │   ├── data/
 │   │   ├── sqlite.py                    M3 只读 SQL 执行
 │   │   ├── schema.py                    M3 表结构探查
@@ -222,14 +234,19 @@ data-assistant/
 │   ├── test_prompts.py                ✅ M1 协议提示词
 │   ├── test_tools.py                  ✅ M1 工具协议与注册表
 │   ├── test_integration_deepseek.py   ✅ M1 真实 API 冒烟（默认跳过）
-│   ├── test_memory_*.py                 M2
+│   ├── test_memory_window.py           ✅ M2 窗口
+│   ├── test_memory_summarizer.py       ✅ M2 摘要
+│   ├── test_memory_long_term.py        ✅ M2 SQLite/KV/衰减检索
+│   ├── test_memory_retriever.py        ✅ M2 策略编排与重放
+│   ├── test_app.py                     ✅ M2 外层装配
+│   ├── test_integration_memory.py      ✅ M2 真实 API 冒烟（默认跳过）
 │   ├── test_data_ask.py                 M3（固定 SQLite 测试库）
 │   ├── test_profile_habits.py           M3
 │   ├── test_api.py                      M4（TestClient）
 │   └── test_evals.py                    M5
 ├── data/
 │   ├── .gitkeep                      ✅ 数据目录占位
-│   └── README.md                        M2 数据文件说明
+│   └── README.md                      ✅ M2 数据文件说明
 └── evals/
     ├── .gitkeep                      ✅ 评测目录占位
     ├── questions/memory_50.json         M5 50 道记忆问答
@@ -256,16 +273,22 @@ data-assistant/
 - 测试策略：用脚本化 fake 模型（预设响应队列）测试循环分支，真实 DeepSeek 调用
   放 `@pytest.mark.integration`，默认不跑。
 
-### 5.2 M2 记忆系统
+### 5.2 M2 记忆系统（已实现）
 
-- 滑动窗口：最近 20 条消息或 8k token 先到先出；被淘汰的内容先交给分层摘要器。
-- 分层摘要：L0 原文块 → L1 段落摘要 → L2 主题摘要；查询优先用高层摘要定位，
-  命中了再下钻原文，省 token。
-- 长期记忆：摘要 + 原文块入库；向量检索用 NumPy 手写余弦相似度，不引入
-  scikit-learn/向量库。
-- embedding 双通道：优先调 OpenAI 兼容 embedding 端点；DeepSeek 当前若无可用
-  embedding 端点，立即走本地降级——字符 3-gram + 哈希签名向量，同样用 NumPy
-  余弦检索，保证 M2 不因模型能力缺口卡死。
+- 滑动窗口：最近 20 条消息或 8k token 先到先出；`SlidingWindow.add()` 把
+  淘汰消息原样返回，`MemoryManager` 立刻交给摘要层，不直接丢。
+- 分层摘要：会话级 → 日级 → 周级。窗口超窗时增量更新会话摘要；一批消息
+  `finalize` 后按天 rollup 日级、按 ISO 周 rollup 周级。摘要器只依赖模型
+  `complete(messages)` 鸭子协议，fake 可完全替代。
+- SQLite 持久化：`messages`、`summaries`、`kv_memories` 三张表，schema
+  版本 `PRAGMA user_version=1`，重开幂等。
+- 长期记忆：key-value 写入/读取/时间衰减检索。检索分 =
+  `文本相关性 × 权重 × exp(-decay_lambda × 年龄天数)`；相关性用手写 token
+  覆盖度（ASCII 词 + 中文单字与 2-gram），不调 embedding，离线可测。
+- 策略对比（为 M5 铺路）：`none` / `window` / `window_summary` / `full`
+  四个枚举；同一批消息用 `replay_memory_strategies` 重放，每个策略独立 SQLite。
+- 核心循环零改动：`MemoryManager.augment_question()` 把上下文拼进用户问题，
+  再交给 M1 `run_tool_loop`；`complete/stream_chat` 鸭子协议保持不变。
 
 ### 5.3 M3 智能问数
 
@@ -297,14 +320,15 @@ data-assistant/
 | ------ | ------ | ------ | -------- |
 | DeepSeek 聊天 API | 连接/读超时（10s/30s），指数退避重试 2 次 | 切换非流式重试一次 | 返回“模型暂时不可用”+原因的结构化错误；若 SQL 已算出则直接格式化返回数值 |
 | DeepSeek 流式响应 | SSE 逐 token | 自动改非流式一次拿全量 | 同聊天兜底 |
-| embedding 端点 | 调 API 取向量 | 本地字符 3-gram 哈希向量（NumPy 余弦） | 纯关键词包含匹配 |
-| 记忆检索空结果 | 扩大 k / 降低阈值再查一次 | 回退滑动窗口原文 | 明确告知“长期记忆未命中，只有近期窗口线索” |
+| 摘要 LLM 调用 | 会话/日/周逐层 LLM 摘要 | 摘要模型不可用时暂存截断原文，消息不丢 | 下一次 LLM 恢复后重新摘要 |
+| 长期记忆检索空结果 | full 策略扩大 top-k / 调小 decay_lambda 再查 | 回退滑动窗口 + 分层摘要 | 明确告知“长期记忆未命中，只有近期窗口/摘要线索” |
 | SQL 生成/执行失败 | 错误回填模型修正，最多 3 轮 | 换更小 schema（只给相关表）重问一次 | 返回“没查到 + 原因 + 试过的 SQL” |
 | SQLite 锁或损坏 | busy_timeout 后重试 | 打开只读副本 | 返回明确错误，不动用户原始库 |
 | FastAPI 启动时模型/数据库不可用 | 启动告警 | `/health` 报降级状态 | 请求返回 503 JSON 而非堆栈 |
 
 配置默认值：HTTP 连接超时 10s、读取超时 30s、模型重试 2 次、工具循环 6 轮、
-SQL 修正 3 轮、检索 top-k=8。全部集中在 `config.py`，评测可覆盖。
+SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay_lambda=0.05、
+默认策略 full、默认库 `data/pda.db`。全部集中在 `config.py`，评测可覆盖。
 
 ---
 
@@ -315,17 +339,18 @@ SQL 修正 3 轮、检索 top-k=8。全部集中在 `config.py`，评测可覆�
 - 题集：`evals/questions/memory_50.json`，50 道中文问题，覆盖时间（“上周学了
   什么”）、主题（“关于 XX 的笔记”）、数字细节、跨素材综合；每题带参考答案关键点。
 - 喂入固定素材包（同一批文章/笔记/聊天，固定顺序），保证可复现。
-- 三种策略对比：
-  - S0 仅滑动窗口（窗口外的内容必须答不出，作为下界）
-  - S1 滑动窗口 + 分层摘要
-  - S2 完整系统：滑动窗口 + 分层摘要 + 长期记忆 + NumPy 检索（S2 为生产策略）
+- 四种策略对比（`memory.models.MemoryStrategy`，已可重放）：
+  - S0 无记忆（不注入任何上下文，作为最下界）
+  - S1 仅滑动窗口（窗口外内容必须答不出）
+  - S2 滑动窗口 + 会话/日/周分层摘要
+  - S3 完整系统：滑动窗口 + 分层摘要 + KV 长期记忆时间衰减检索（生产默认 full）
 - 指标：
   1. 准确率：答案关键点覆盖率。主判分用 DeepSeek 固定 prompt 做 LLM-as-judge，
      同时提供规则判分脚本（关键词 + 数字匹配）兜底，避免“模型给自己打分”的偏差。
-  2. 成本：每题输入/输出 token、检索注入 token、估算费用；汇总三种策略总成本。
+  2. 成本：每题输入/输出 token、检索注入 token、估算费用；汇总四种策略总成本。
   3. 召回：长期记忆检索命中率（应命中的题是否进了 top-k）。
   4. 延迟与重试次数。
-- 输出：`evals/reports/memory_*.json` + 一张三策略对比表。
+- 输出：`evals/reports/memory_*.json` + 一张四策略对比表。
 - 成本控制：DeepSeek 单题成本低；评测先跑小样本（10 题）验证流程，再跑全量；
   失败重试计入重试次数，不无限烧钱。
 
@@ -350,7 +375,7 @@ SQL 修正 3 轮、检索 top-k=8。全部集中在 `config.py`，评测可覆�
 
 1. M0：骨架 + 架构 + 契约测试（当前）。
 2. M1：先写 `test_core_loop.py`（fake 模型脚本）→ 实现 `config/llm/core/tools`。
-3. M2：先写记忆检索与摘要的样例库测试 → 实现 `memory` 各模块与工具。
+3. M2：先写窗口/摘要/持久化/策略重放的样例库测试 → 实现 `memory` 各模块与 `app` 外层装配。
 4. M3：先写固定 SQLite 测试库的问数测试 → 实现 `data`、`profile`。
 5. M4：先写 FastAPI TestClient 测试 → 实现路由与极简页面。
 6. M5：先写题集校验与判分测试 → 跑评测 → 写完整 README。
@@ -367,15 +392,18 @@ SQL 修正 3 轮、检索 top-k=8。全部集中在 `config.py`，评测可覆�
   封装。协议为 `{"action":"tool","tool":"<名>","args":{...}}` 与
   `{"action":"final","answer":"..."}`，工具结果用 user 角色回填。理由：可观测、
   可 mock、可把解析错误回填模型自纠、模型不支持 function calling 时也能降级。
-- ADR-3：向量存 SQLite BLOB + NumPy 余弦，不引入向量数据库。理由：规模小、
-  满足手写检索要求、部署简单。
+- ADR-3（M2 修订）：长期记忆检索先用 KV 时间衰减（相关性 × 权重 ×
+  exp(-lambda × 年龄天数)），不引入 NumPy/向量库。理由：规模小、离线可测、
+  可解释；语义向量作为后续增强通道，接口 `search_memories` 返回形状不变。
 - ADR-4：用户小数据库只读 + SQL 白名单。理由：个人记账数据不可被模型幻觉
   写成灾难。
 - ADR-5：评测数据与真实数据物理隔离。理由：评测可重复，不污染个人记忆。
+- ADR-6：摘要层级定稿为会话级 → 日级 → 周级，不再使用 L0/L1/L2 说法；
+  记忆作为核心循环的外层组件通过 `augment_question` 接入，不改 M1 循环协议。
 
 ---
 
 ## 9. 非目标重申
 
 不做多智能体、不做分布式、不做登录系统、不追 benchmark 排名。本项目唯一
-“排行榜”是 M5 自己三策略的对比表，目的是展示工程判断，不是刷分。
+“排行榜”是 M5 自己四策略的对比表，目的是展示工程判断，不是刷分。

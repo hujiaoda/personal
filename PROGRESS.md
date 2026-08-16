@@ -156,3 +156,102 @@
 8. 更新 README（进度表 + 设计取舍表）、architecture.md（Python 3.10、M1 标 ✅）、
    PROGRESS.md；停下汇报，等确认后再进 M2。
 
+
+---
+
+## M2 记忆系统（滑动窗口 + 分层摘要 + SQLite + KV 时间衰减 + 四策略重放）
+
+### 进度
+
+- 严格 TDD：先写 6 个测试文件（`test_memory_window.py`、`test_memory_summarizer.py`、
+  `test_memory_long_term.py`、`test_memory_retriever.py`、`test_app.py`、
+  `test_integration_memory.py`）并扩展 `test_config.py` 的记忆默认值用例；
+  红阶段为 6 个 collection error（memory 包与 app 模块不存在）。
+- 新增实现（每个文件顶部都有中文取舍注释）：
+  - `memory/models.py`：共享 `Message`/`Summary`/`KVMemory`/`MemoryContextItem`/
+    `MemoryStrategy` 与 UTC 时间/日/周工具，避免包内循环 import。
+  - `memory/window.py`：双预算 FIFO 窗口（默认 20 条 / 8k token）；`add()` 只返回
+    淘汰消息，不自己调摘要/落库；支持单条超预算自淘汰。
+  - `memory/summarizer.py`：LLM 分层摘要会话级→日级→周级；只依赖模型
+    `complete(messages)` 鸭子协议；异常包成 `SummarizerError`；源文本超长截断。
+  - `memory/long_term.py`：标准库 `sqlite3` 落库（`messages`/`summaries`/
+    `kv_memories`，`PRAGMA user_version=1`）；消息、摘要 upsert（session 按
+    level+session_id，daily/weekly 按 level+period_key）；KV 写入/读取（读取回写
+    access_count/last_accessed_at）/时间衰减检索：
+    `相关性 × weight × exp(-decay_lambda × 年龄天数)`。
+  - `memory/retriever.py`：`MemoryManager` 编排。超窗淘汰消息立即增量更新会话摘要；
+    `ingest_messages(finalize=True)` 自动 end_session→rollup_daily→rollup_weekly；
+    检索按 `none/window/window_summary/full` 分叉；摘要失败降级“暂存截断原文”。
+    提供 `replay_memory_strategies()`：同一批对话 × 四策略 × 独立 SQLite 重放，
+    为 M5 铺路。
+  - `app.py`：`PersonalAssistant` 装配入口；`ask()` 先
+    `memory_manager.augment_question()` 再进 `run_tool_loop`，M1 循环零改动。
+  - `config.py` 增加记忆默认值：strategy=full、窗口 20/8000、top-k=8、
+    decay_lambda=0.05、db=`data/pda.db`，全部支持 `PDA_MEMORY_*` 环境变量覆盖。
+- 工程配置：**无新第三方依赖**（M2 只用标准库 sqlite3/math/re）；`.env.example`
+  补 `PDA_MEMORY_*`；新增 `data/README.md` 数据文件说明。
+- 文档：`docs/architecture.md` 修订 v0.2（摘要层级由 L0/L1/L2 定稿为
+  会话/日/周；长期记忆检索定稿为 KV 时间衰减，向量改为后续增强；目录与测试
+  标 ✅；ADR-3 修订 + ADR-6 新增）；README 更新 M2 状态与设计取舍；
+  新增 `docs/reproduce/M2-memory.md`（核心概念/数据流/复现步骤/自测 5 题/
+  面试预演 5 题）。
+- 测试结果：`PYTHONPATH= .venv/bin/python -m pytest` → **90 passed, 4 deselected**；
+  `-m integration` 无密钥 → **4 skipped**（2 道 M1 聊天 + 2 道 M2 记忆，符合
+  fake 优先、真实 API 默认跳过）。
+
+### 踩过的坑
+
+1. **“结束会话要不要清窗口”想当然会翻车**：第一版 `end_session` 把该会话消息从
+   窗口移除，结果 finalize 之后窗口是空的，`window_summary/full` 检索只剩摘要，
+   丢掉“近期原文精确命中”通道，三个测试同时红。最终改为：end_session 只做摘要、
+   消息留在窗口；manager 用 `_summarized_message_ids` 记已摘要 id，未来消息被
+   淘汰时先过滤，避免重复压进摘要。
+2. **中文短查询会被 2-gram token 漏掉**：`“我学了什么”` 的 2-gram 是
+   我学/学了/了什/什么，和 `“Python 装饰器学习记录”` 没有任何交集，full 策略
+   检索为空。tokenizer 改为“中文单字 + 2-gram 都保留”；个人记忆库规模小，
+   召回优先于精确，测试专门锁了这类短查询。
+3. **开发机真实时间不可信，时间衰减测试必须全程注入时钟**：本机当前日期与测试
+   固定的 2025 年不一致，`get_memory()` 忘记传 `now` 时 last_accessed_at 直接
+   变成 2026 年，红得莫名其妙。教训：所有时间相关 API（put/get/search/manager/
+   summary）都提供 `now` 或 `now_fn` 注入，测试里一条都不要依赖系统时间。
+4. **ISO 周边界不能写 `fromisocalendar(year, week+1, 1)`**：遇到 53 周年份
+   （如 2020）week+1=54 直接 ValueError；正确写法是
+   `monday + timedelta(days=7)`。
+5. **摘要 prompt 的层级词放错位置会锁死脆弱断言**：最初层级词只写在 user 消息，
+   测试只想在 system 里找，红。实现上把“本次任务：生成 X 级摘要”同时放进 system，
+   调试一眼可读；测试改为断言 system+user 合并文本，不逐字锁文案。
+6. **重放必须每个策略一个库且先 unlink**：SQLite 文件复用会让第二次重放读到
+   上一轮的 messages/summaries/kv，策略对比被污染。`replay_memory_strategies`
+   对 `memory_<strategy>.db` 先 `unlink(missing_ok=True)` 再建 manager。
+7. **config 校验策略不要反向 import memory 包**：`config.py` 是底层模块，用
+   本地 `_MEMORY_STRATEGIES` 集合校验，保持依赖方向；`MemoryManager` 的枚举
+   校验是第二道闸，两边允许的值必须同步。
+
+### 复现要点
+
+关掉代码后重写 M2，按这个顺序来：
+
+1. 读 `docs/architecture.md` 5.2 与 `docs/reproduce/M2-memory.md`；确认
+   `PYTHONPATH= .venv/bin/python -m pytest` 是唯一测试命令。
+2. **先写 6 个测试文件 + config 扩展**：窗口（双预算/evicted 返回/超大单条）、
+   摘要（fake complete/三级 prompt/截断/SummarizerError）、long_term（schema 幂等/
+   消息 roundtrip/KV upsert 与读取计数/衰减公式比值/摘要 upsert 唯一）、
+   retriever（四策略/超窗进摘要/finalize 三级链/full 时间衰减通道/重放隔离/
+   core 外层接缝）、app（上下文注入 run_tool_loop）、integration（整文件 mark +
+   无 key skip）。
+3. 跑 `PYTHONPATH= .venv/bin/python -m pytest -q` 看 6 个 collection error 红。
+4. 按依赖自底向上实现：`memory/models.py`（UTC/ISO 时间、日/周 key、策略枚举）
+   → `window.py`（双预算 FIFO，evicted 只返回）→ `summarizer.py`（三级 prompt、
+   duck complete、usage 归一化、截断）→ `long_term.py`（建表→消息→摘要 upsert→
+   KV put/get/search）→ `retriever.py`（ingest/end_session/rollup/retrieve/
+   replay）→ `app.py`（薄装配）→ `config.py` 记忆字段。
+5. 重点复现三个接缝：
+   - 超窗不丢：`ingest` 里 evicted → `_fresh_for_summary` → 增量会话摘要 →
+     `_mark_summarized`；
+   - 策略分叉只在 `retrieve`：none/window/window_summary/full 的通道组合；
+   - 外层接入：`augment_question` 拼上下文 → `run_tool_loop`，loop/client 零改动。
+6. 跑 `PYTHONPATH= .venv/bin/python -m pytest`，目标 90 passed、4 deselected；
+   再跑 `-m integration` 确认无密钥 4 skipped。
+7. 更新 README（进度表/设计取舍）、architecture.md（v0.2/5.2/存储表/ADR）、
+   `.env.example`、`data/README.md`、`docs/reproduce/M2-memory.md`、本文件；
+   停下汇报，等确认后再进 M3。

@@ -16,6 +16,9 @@ class ConfigError(ValueError):
     """配置缺失或取值非法。"""
 
 
+_MEMORY_STRATEGIES = frozenset({"none", "window", "window_summary", "full"})
+
+
 @dataclass(frozen=True)
 class Settings:
     """项目全局配置。默认值与 docs/architecture.md「降级与 B 计划」保持一致。"""
@@ -28,6 +31,12 @@ class Settings:
     max_retries: int = 2
     max_tool_rounds: int = 6
     max_sql_fix_rounds: int = 3
+    memory_strategy: str = "full"
+    memory_window_size: int = 20
+    memory_window_tokens: int = 8000
+    memory_top_k: int = 8
+    memory_decay_lambda: float = 0.05
+    memory_db_path: str = "data/pda.db"
 
 
 def _require_positive_float(raw: str, name: str) -> float:
@@ -37,6 +46,16 @@ def _require_positive_float(raw: str, name: str) -> float:
         raise ConfigError(f"{name} 必须是数字，当前值: {raw!r}") from exc
     if value <= 0:
         raise ConfigError(f"{name} 必须大于 0，当前值: {value}")
+    return value
+
+
+def _require_non_negative_float(raw: str, name: str) -> float:
+    try:
+        value = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(f"{name} 必须是数字，当前值: {raw!r}") from exc
+    if value < 0:
+        raise ConfigError(f"{name} 必须 >= 0，当前值: {value}")
     return value
 
 
@@ -86,6 +105,32 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
         minimum=1,
     )
 
+    memory_strategy = (values.get("PDA_MEMORY_STRATEGY") or "full").strip().lower()
+    if memory_strategy not in _MEMORY_STRATEGIES:
+        raise ConfigError(
+            f"PDA_MEMORY_STRATEGY 必须是 {'/'.join(sorted(_MEMORY_STRATEGIES))} 之一，当前: {memory_strategy!r}"
+        )
+    memory_window_size = _require_non_negative_int(
+        values.get("PDA_MEMORY_WINDOW_SIZE") or "20",
+        "PDA_MEMORY_WINDOW_SIZE",
+        minimum=1,
+    )
+    memory_window_tokens = _require_non_negative_int(
+        values.get("PDA_MEMORY_WINDOW_TOKENS") or "8000",
+        "PDA_MEMORY_WINDOW_TOKENS",
+        minimum=1,
+    )
+    memory_top_k = _require_non_negative_int(
+        values.get("PDA_MEMORY_TOP_K") or "8",
+        "PDA_MEMORY_TOP_K",
+        minimum=1,
+    )
+    memory_decay_lambda = _require_non_negative_float(
+        values.get("PDA_MEMORY_DECAY_LAMBDA") or "0.05",
+        "PDA_MEMORY_DECAY_LAMBDA",
+    )
+    memory_db_path = (values.get("PDA_MEMORY_DB_PATH") or "data/pda.db").strip()
+
     return Settings(
         api_key=api_key,
         base_url=base_url,
@@ -95,4 +140,10 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
         max_retries=max_retries,
         max_tool_rounds=max_tool_rounds,
         max_sql_fix_rounds=max_sql_fix_rounds,
+        memory_strategy=memory_strategy,
+        memory_window_size=memory_window_size,
+        memory_window_tokens=memory_window_tokens,
+        memory_top_k=memory_top_k,
+        memory_decay_lambda=memory_decay_lambda,
+        memory_db_path=memory_db_path,
     )

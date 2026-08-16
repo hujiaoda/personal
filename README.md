@@ -7,8 +7,8 @@
 ## 项目定位
 
 - 模型：DeepSeek API（OpenAI 兼容接口），密钥放环境变量。
-- 栈：Python 3.10+（开发机用 uv + Python 3.10）+ httpx + SQLite + NumPy
-  （手写余弦检索）+ FastAPI + pytest。
+- 栈：Python 3.10+（开发机用 uv + Python 3.10）+ httpx + SQLite + pytest；
+  M4 再引入 FastAPI。长期记忆检索手写时间衰减，不依赖向量库。
 - 约束：不用 LangChain、不用 openai SDK，不用重量级框架；核心机制（工具循环、
   记忆、检索、Text-to-SQL）全部手写。
 - 可靠性：所有对外调用带超时、重试和降级，失败必须有 B 计划，不许崩溃。
@@ -19,10 +19,10 @@
 | ------ | ---- | ---- |
 | M0 | 仓库骨架 + 架构设计文档 | 已完成 |
 | M1 | 核心循环：模型调用 → 工具执行 → 结果回填 → 循环 | 已完成 |
-| M2 | 记忆系统：滑动窗口 + 分层摘要 + 长期记忆 + 检索 | 未开始 |
+| M2 | 记忆系统：滑动窗口 + 会话/日/周摘要 + SQLite + KV 时间衰减检索 + 四策略重放 | 已完成 |
 | M3 | 智能问数：大白话 → 查表结构 → 写 SQL → 执行 → 自动修正 → 解释 | 未开始 |
 | M4 | 网页：FastAPI 接口 + 极简页面 | 未开始 |
-| M5 | 评测：50 道记忆问答 + 三种记忆策略对比 + SQL 准确率 + 完整 README | 未开始 |
+| M5 | 评测：50 道记忆问答 + 四种记忆策略对比 + SQL 准确率 + 完整 README | 未开始 |
 
 ## 目录速览
 
@@ -30,12 +30,14 @@
 data-assistant/
 ├── docs/architecture.md   # 架构设计文档（模块、数据流、目录、评测）
 ├── src/personal_data_assistant/
-│   ├── config.py          # M1 配置与默认值
+│   ├── config.py          # M1/M2 配置与默认值（M2 增加记忆参数）
+│   ├── app.py             # M2 装配入口（记忆作为 core 外层组件）
 │   ├── llm/               # M1 手写 httpx 客户端 + JSON 动作协议提示词
 │   ├── core/loop.py       # M1 工具调用循环状态机
+│   ├── memory/            # M2 窗口 / 分层摘要 / SQLite / 时间衰减检索
 │   └── tools/             # M1 工具协议 + 注册表
 ├── tests/                 # pytest 测试（先写测试，再写实现）
-├── data/                  # SQLite 数据、向量、样例数据
+├── data/                  # SQLite 系统库、样例数据
 ├── evals/                 # 评测题集与评测脚本（M5）
 ├── pyproject.toml         # Python >=3.10,<3.13 工程配置
 ├── PROGRESS.md            # 每步的进度、坑、复现要点
@@ -74,6 +76,15 @@ PYTHONPATH= .venv/bin/python -m pytest
 选择 JSON 动作协议的理由：本项目要“可观测、可 mock、可降级、不绑定 SDK”，
 而不是追求最小 prompt 开销。M1 先锁住单工具调用；若 M3 问数暴露出并行查多表的
 真实收益，再在协议里加批量动作，解析器与轨迹结构同步升级。
+
+### 为什么 M2 长期记忆先做 KV 时间衰减，不做向量检索
+
+M2 的目标是先把「记忆入库 → 分层压缩 → 可检索」的整条链路跑通，并为 M5
+铺出四种可重放策略。长期记忆检索公式为
+`相关性 × 权重 × exp(-decay_lambda × 年龄天数)`：只依赖标准库 SQLite，
+离线可测、结果可解释，个人记忆库几千条以内完全够用。语义向量（embedding +
+余弦）作为后续增强通道，替换时只动 `MemoryDatabase.search_memories` 内部，
+返回的 KVMemory 形状不变。不引入 NumPy/向量库，也少一个平台依赖和降级分支。
 
 ### 为什么手写 httpx 而不是用 openai SDK
 
