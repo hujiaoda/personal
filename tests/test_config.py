@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # 测试设计取舍：
-# 1) config 是 M1 所有默认值的唯一来源，测试必须锁死架构文档里的默认值，
+# 1) config 是所有默认值的唯一来源，测试必须锁死架构文档里的默认值，
 #    避免默认值散落到 loop/client 里以后改不动。
 # 2) load_settings 显式接收 env 映射，不碰真实环境，测试可重复。
 # 3) 只断言行为和默认值，不锁死报错文案细节（文案会打磨）。
@@ -27,6 +27,10 @@ def test_defaults_match_architecture_document():
     assert settings.memory_top_k == 8
     assert settings.memory_decay_lambda == 0.05
     assert settings.memory_db_path == "data/pda.db"
+    assert settings.sql_user_db_path == "data/user_tables.db"
+    assert settings.sql_query_timeout == 5.0
+    assert settings.sql_row_limit == 100
+    assert settings.sql_schema_sample_size == 3
 
 
 def test_environment_variables_override_defaults():
@@ -46,6 +50,10 @@ def test_environment_variables_override_defaults():
             "PDA_MEMORY_TOP_K": "5",
             "PDA_MEMORY_DECAY_LAMBDA": "0.25",
             "PDA_MEMORY_DB_PATH": "data/test-memory.db",
+            "PDA_SQL_USER_DB_PATH": "data/test-user.db",
+            "PDA_SQL_QUERY_TIMEOUT": "2.5",
+            "PDA_SQL_ROW_LIMIT": "25",
+            "PDA_SQL_SCHEMA_SAMPLE_SIZE": "5",
         }
     )
 
@@ -62,6 +70,10 @@ def test_environment_variables_override_defaults():
     assert settings.memory_top_k == 5
     assert settings.memory_decay_lambda == 0.25
     assert settings.memory_db_path == "data/test-memory.db"
+    assert settings.sql_user_db_path == "data/test-user.db"
+    assert settings.sql_query_timeout == 2.5
+    assert settings.sql_row_limit == 25
+    assert settings.sql_schema_sample_size == 5
 
 
 def test_missing_api_key_raises_config_error():
@@ -102,6 +114,17 @@ def test_invalid_memory_window_topk_and_decay_raise_config_error():
         load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_TOP_K": "0"})
     with pytest.raises(ConfigError):
         load_settings({"DEEPSEEK_API_KEY": "k", "PDA_MEMORY_DECAY_LAMBDA": "-1"})
+
+
+def test_invalid_sql_config_raises_config_error():
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_SQL_USER_DB_PATH": "  "})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_SQL_QUERY_TIMEOUT": "0"})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_SQL_ROW_LIMIT": "0"})
+    with pytest.raises(ConfigError):
+        load_settings({"DEEPSEEK_API_KEY": "k", "PDA_SQL_SCHEMA_SAMPLE_SIZE": "0"})
 
 
 def test_settings_are_immutable_frozen_dataclass():

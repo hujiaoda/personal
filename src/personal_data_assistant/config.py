@@ -37,6 +37,10 @@ class Settings:
     memory_top_k: int = 8
     memory_decay_lambda: float = 0.05
     memory_db_path: str = "data/pda.db"
+    sql_user_db_path: str = "data/user_tables.db"
+    sql_query_timeout: float = 5.0
+    sql_row_limit: int = 100
+    sql_schema_sample_size: int = 3
 
 
 def _require_positive_float(raw: str, name: str) -> float:
@@ -131,6 +135,24 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
     )
     memory_db_path = (values.get("PDA_MEMORY_DB_PATH") or "data/pda.db").strip()
 
+    sql_user_db_path = (values.get("PDA_SQL_USER_DB_PATH") or "data/user_tables.db").strip()
+    if not sql_user_db_path:
+        raise ConfigError("PDA_SQL_USER_DB_PATH 不能为空")
+    sql_query_timeout = _require_positive_float(
+        values.get("PDA_SQL_QUERY_TIMEOUT") or "5",
+        "PDA_SQL_QUERY_TIMEOUT",
+    )
+    sql_row_limit = _require_non_negative_int(
+        values.get("PDA_SQL_ROW_LIMIT") or "100",
+        "PDA_SQL_ROW_LIMIT",
+        minimum=1,
+    )
+    sql_schema_sample_size = _require_non_negative_int(
+        values.get("PDA_SQL_SCHEMA_SAMPLE_SIZE") or "3",
+        "PDA_SQL_SCHEMA_SAMPLE_SIZE",
+        minimum=1,
+    )
+
     return Settings(
         api_key=api_key,
         base_url=base_url,
@@ -146,4 +168,8 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
         memory_top_k=memory_top_k,
         memory_decay_lambda=memory_decay_lambda,
         memory_db_path=memory_db_path,
+        sql_user_db_path=sql_user_db_path,
+        sql_query_timeout=sql_query_timeout,
+        sql_row_limit=sql_row_limit,
+        sql_schema_sample_size=sql_schema_sample_size,
     )

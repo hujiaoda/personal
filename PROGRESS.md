@@ -255,3 +255,127 @@
 7. 更新 README（进度表/设计取舍）、architecture.md（v0.2/5.2/存储表/ADR）、
    `.env.example`、`data/README.md`、`docs/reproduce/M2-memory.md`、本文件；
    停下汇报，等确认后再进 M3。
+
+---
+
+## M3 智能问数（sql_query 工具 + 只读安全 + 自纠错 + 评测埋点 + 习惯别名）
+
+### 进度
+
+- 严格 TDD：先写 6 个 M3 主测试文件（`test_data_sqlite.py`、
+  `test_data_schema.py`、`test_data_ask.py`、`test_data_demo.py`、
+  `test_sql_tools.py`、`test_integration_sql.py`）并扩展 `test_config.py`
+  的 M3 默认值用例；红阶段为 6 个 collection error（data 包、tools.sql_tools
+  不存在），与 M1/M2 的红阶段形态一致。主流程转绿后，加分项
+  `test_profile_habits.py` 再单独走一次“先红后绿”。
+- 新增实现（每个文件顶部都有中文取舍注释）：
+  - `data/sqlite.py`：用户库只读执行器。三层安全闸：①白名单 `validate_readonly_sql`
+    ——状态机分词（normal/single/double/backtick/bracket/line/block）识别字符串与
+    注释里的分号，只允许单条 `SELECT/WITH` 开头；②SQLite URI `mode=ro` 惰性连接 +
+    `PRAGMA query_only=ON`；③progress handler 执行超时（默认 5s）+
+    `fetchmany(max_rows+1)` 行数保护（默认 100）。异常统一成
+    `SQLSecurityError/SQLTimeoutError/SQLExecutionError/SQLDatabaseError`。
+  - `data/schema.py`：读 `sqlite_master` + 表值函数 `pragma_table_info(?)`，
+    产出紧凑 schema JSON（表名/字段/类型/主键/每列最多 3 个样例值）；邮箱与
+    11 位手机号先脱敏，金额/日期/时长原样保留，样例按字符宽度截断。
+  - `data/ask.py`：问数子循环。schema 只探查一次；模型生成 SQL → 只读执行 →
+    失败把「失败 SQL + 真实错误」回填重写（最多 `max_sql_fix_rounds=3` 次修正，
+    总执行最多 4 次）；成功后模型中文解释，解释失败走确定性格式化兜底。
+    评测埋点：`AskResult/SqlEvalRecord` 记录首次成功、修正成功、修正轮数、
+    model_calls、token usage、每次 `SqlAttempt` 日志；聚合计算留 M5。
+  - `data/demo.py` + `scripts/seed_user_tables.py`：中文演示库生成器，
+    `data/user_tables.db` 含 `expenses`（32 行记账流水）、`study_logs`（26 行
+    学习记录）、`movie_logs`（24 行观影记录），可删掉确定性重建。
+  - `tools/sql_tools.py`：`create_sql_query_tool()` 把 ask_database 包装成 M1
+    普通工具 `sql_query`；库路径装配期锁死，模型参数只有 question；成功回填
+    结构化 dict（answer/sql/rows/usage/评测字段），失败 `ToolResult(ok=False)`
+    且保留 payload 与 error。
+  - `profile/habits.py`（加分项，已做）：`HabitAliasStore` 复用 M2 KV 记忆，
+    key=`sql_alias:<用户说法>`、value=标准说法、category=`sql_alias`、weight 当
+    置信度；重复纠正 weight+1 封顶 5；改写顺序“长说法优先 → 高权重优先”。
+    profile 不 import memory，由 app 注入 `memory_manager.db` 鸭子协议。
+  - `app.py` 扩展：可选 `sql_query_tool` 或 `user_db_path` 自动注册问数工具；
+    可选 `habits`；`ask()` 顺序固定为“习惯改写 → 记忆上下文增强 →
+    run_tool_loop”。`learn_alias()` 供后续纠正学习。M1/M2 既有参数与行为不变。
+  - `config.py` 增加 M3 默认值：`sql_user_db_path=data/user_tables.db`、
+    `sql_query_timeout=5.0`、`sql_row_limit=100`、`sql_schema_sample_size=3`，
+    对应 `PDA_SQL_*` 环境变量全部可覆盖且非法值启动即报错。
+- 工程配置：M3 无新第三方依赖（sqlite3/time/re/urllib 全是标准库）。
+  `.env.example` 补 `PDA_SQL_*`；`data/README.md` 记录三张演示表与重建命令。
+- 文档：`docs/architecture.md` 修订 v0.3（M3 模块标 ✅、5.3 定稿、SQL 三层闸、
+  ADR-7 别名复用 KV、M3 配置默认值）；README 更新 M3 状态/目录/快速开始/
+  SQL 安全设计取舍；新增 `docs/reproduce/M3-sql.md`（核心概念/数据流/复现步骤/
+  自测 5 题/面试预演 5 题）。
+- 测试结果：`PYTHONPATH= .venv/bin/python -m pytest` → **159 passed,
+  5 deselected**；`-m integration` 无密钥 → **5 skipped**（2 M1 + 2 M2 + 1 M3，
+  符合 fake 优先、真实 API 默认跳过）。
+
+### 踩过的坑
+
+1. **Python 3.10 的 `sqlite3` 多语句是“只警告、只执行第一条”，不是报错**：
+   `conn.execute("SELECT 1; DROP TABLE t")` 会默默执行 SELECT，后面的恶意语句
+   被忽略但也不会告诉你。所以白名单必须自己写状态机拆语句，数出非空语句条数；
+   只靠 `sqlite3.complete_statement()` 也拆不开两条完整语句。
+2. **`set_progress_handler(None)` 缺 n 参数直接 TypeError**：Python 的
+   `set_progress_handler(handler, n)` 两个参数都是必填，移除 handler 要写
+   `set_progress_handler(None, 1000)`；第一版在 finally 里漏了 n，所有正常查询
+   在收尾时抛 TypeError，红得特别隐蔽。
+3. **`WITH ... DELETE` 能穿过 startswith("WITH") 白名单**：SQLite 允许 CTE 前缀
+   接 DELETE/UPDATE/INSERT。白名单只挡形态，真正的写保护必须靠 `mode=ro` +
+   `PRAGMA query_only=ON`；两层都测过，`WITH a AS (...) DELETE FROM t` 会变成
+   SQLSecurityError（readonly 拒绝），数据不变。
+4. **只读 URI 的路径必须 percent-encode**：直接 `f"file:{path}?mode=ro"` 遇到
+   空格/中文/`?`/`#` 路径会把参数解析坏；实现用 `urllib.parse.quote(path, safe="/")`。
+5. **`AskResult.rows` 用 tuple of tuples，测试容易顺手写成 list**：M1 回填要
+   JSON 友好，`to_dict()` 负责转 list；内部 dataclass 用不可变 tuple，避免工具
+   返回后外层再改坏结果。测试断言统一 `((...),)`，不然又是一排假红。
+6. **模型 fake 返回 dict 会被 core.loop 拒绝**：M1 循环的 `_normalize_response`
+   只认字符串/带 content 属性的对象，不认 dict；`data.ask` 内部 `_normalize_model_response`
+   认 dict。两处协议能力不同，写接缝测试时 fake 最好统一返回 `LLMResponse` 或
+   纯字符串，别偷懒返回 `{"content": ...}`。
+7. **解释模型失败不能把 status 改成 failed**：数据已经查出来了，失败只发生在
+   “人话层”。B 计划是用 `format_result_fallback` 拼确定性中文（数字 + 口径 +
+   SQL 原文），status 仍 success；否则 M5 会把“问数成功但解释超时”误判成 SQL
+   失败，指标全偏。
+8. **习惯别名按 key 存，同一说法只有一个 canonical**：`sql_alias:片子` 第二次
+   记录“视频”会覆盖“电影”，这是 KV upsert 的预期行为（用户最新纠正生效），
+   不能想当然做成“两个候选按权重竞争”。权重记录的是该说法被确认的次数，不是
+   两个同 key 候选的票数。
+9. **app.ask 的接缝顺序别写反**：必须先 `habits.rewrite_question` 再
+   `memory.augment_question`。反过来先记忆后改写，记忆检索用“饭钱”可能漏掉
+   `餐饮` 相关 KV；而且 SQL 工具拿到的问题也会带着用户黑话，平白增加修正轮数。
+
+### 复现要点
+
+关掉代码后重写 M3，按这个顺序来：
+
+1. 读 `docs/architecture.md` 5.3 与 `docs/reproduce/M3-sql.md`；确认
+   `PYTHONPATH= .venv/bin/python -m pytest` 是唯一测试命令。
+2. **先写 7 个测试文件 + config 扩展**：sqlite 安全（白名单/多语句/只读/超时/
+   截断）、schema（表视图/样例脱敏/JSON 渲染）、ask（fake 队列测首轮成功、
+   修正一次、写拒绝修正、修正耗尽、超时修正、解释兜底、评测字段）、demo
+   （三表行数与中文数据）、sql_tools（注册 + core 接缝 + 记忆共存）、
+   profile_habits（KV 别名/加权/改写顺序/app 接缝）、integration（整文件 mark +
+   无 key skip）。
+3. 跑 `PYTHONPATH= .venv/bin/python -m pytest -q` 看 6 个 collection error 红。
+4. 按依赖自底向上实现：
+   - `data/sqlite.py`：先 `split_sql_statements` 状态机 → `validate_readonly_sql`
+     → `_readonly_uri` → 惰性只读连接 → `execute_query` 的 progress handler 与
+     fetchmany；
+   - `data/schema.py`：`discover_schema`（sqlite_master 按 rowid 保持建表顺序，
+     `pragma_table_info(?)` 取列，SELECT * LIMIT ? 取样例）→ `redact_sample_value`
+     → `render_schema_summary`；
+   - `data/ask.py`：消息模板 → `_call_model_complete` 归一化 → `extract_sql_text`
+     → 修正 while 循环（attempts_log/fix_rounds 同步）→ 解释与 fallback →
+     `to_eval_record`；
+   - `tools/sql_tools.py`：Tool 参数只留 question，`to_dict()` 回填；
+   - `app.py`：注册 sql_query 工具 + habits 改写，保证 `ask` 顺序；
+   - `config.py`：`PDA_SQL_*` 四个默认值；
+   - 加分项 `profile/habits.py`：只认 kv_backend 鸭子协议，`sql_alias:` key 规范。
+5. 跑 `PYTHONPATH= .venv/bin/python -m pytest`，目标 **159 passed, 5 deselected**；
+   再跑 `-m integration` 确认无密钥 **5 skipped**。
+6. 生成演示库：`PYTHONPATH= .venv/bin/python scripts/seed_user_tables.py`；
+   用 `sqlite3 data/user_tables.db` 抽查三表行数与中文内容。
+7. 更新 README（进度表/SQL 安全设计取舍/快速开始）、architecture.md（v0.3、
+   5.3、目录标 ✅、ADR-7）、`.env.example`、`data/README.md`、
+   `docs/reproduce/M3-sql.md`、本文件；停下汇报，等确认后再进 M4。

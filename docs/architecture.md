@@ -1,7 +1,7 @@
 # Personal Data Assistant 架构设计文档
 
-- 版本：v0.2（M2 评审修订：摘要层级与长期记忆检索按 M2 范围定稿）
-- 状态：已确认；作为 M2~M5 的实现依据
+- 版本：v0.3（M3 评审修订：智能问数、SQL 三层安全闸、评测埋点、习惯别名定稿）
+- 状态：已确认；作为 M3~M5 的实现依据
 - 约束：Python 3.10+（开发机 3.10.12 + uv；见 PROGRESS「环境决策」）；
   不用 LangChain 与重量级框架；模型走 DeepSeek API（OpenAI 兼容）；核心机制全部手写
 
@@ -58,8 +58,9 @@ LangChain/LlamaIndex 等编排框架。
 | 数据访问 `data.sqlite` | `src/personal_data_assistant/data/sqlite.py` | 只读连接管理、安全 SQL 执行、错误捕获 | SQL → 行集/错误 |
 | 表结构探查 `data.schema` | `src/personal_data_assistant/data/schema.py` | 读 `sqlite_master`，产出紧凑表结构摘要供模型使用 | 库文件 → schema 摘要 |
 | 智能问数 `data.ask` | `src/personal_data_assistant/data/ask.py` | 编排：问题 → schema → 生成 SQL → 只读执行 → 错误回填修正 → 解释结果 | 大白话, 库文件 → 答案, SQL 轨迹 |
-| 习惯记忆 `profile.habits` | `src/personal_data_assistant/profile/habits.py` | 记录“用户说法 → 标准词”映射与置信度；查询前改写；用户纠正时更新 | 用语证据 → 别名表 |
-| 应用装配 `app` | `src/personal_data_assistant/app.py` | 把配置、模型、记忆、工具、循环组装成一个入口 | 配置 → 助手实例 |
+| 问数工具 `tools.sql_tools` | `src/personal_data_assistant/tools/sql_tools.py` | 把 data.ask 包装成 M1 工具表里的 `sql_query`；库路径装配期锁死 | 模型/库配置 → Tool |
+| 习惯记忆 `profile.habits` | `src/personal_data_assistant/profile/habits.py` | 记录“用户说法 → 标准词”映射与置信度；查询前改写；复用 KV 记忆 | 用语证据 → 别名表 |
+| 应用装配 `app` | `src/personal_data_assistant/app.py` | 把配置、模型、记忆、工具、习惯、循环组装成一个入口 | 配置 → 助手实例 |
 | Web 接口 `api` | `src/personal_data_assistant/api/` | FastAPI 路由 + 极简静态页面；SSE 或分块输出流式答案 | HTTP 请求 → 回答/事件流 |
 | 评测 `evals/` | `evals/` | 题集、判分、成本统计、报告；独立于业务代码 | 评测配置 → 指标报告 |
 
@@ -168,8 +169,9 @@ M0 只设计不建表；M2/M3 由各自的迁移测试先锁行为，再写实�
   estimated, created_at)`
 - `kv_memories(key, value, category, weight, created_at, updated_at,
   access_count, last_accessed_at)`
-- M3 规划：`user_aliases(id, raw_term, canonical_term, kind, weight,
-  evidence_count, updated_at)`、`user_profile(key, value, updated_at)`
+- M3 已实现：问数别名不新建表，复用 `kv_memories`（key=`sql_alias:<用户说法>`、
+  value=标准说法、category=`sql_alias`、weight=置信度）；原规划的
+  `user_aliases`/`user_profile` 独立表留作后续画像扩展。
 - M5 规划：`eval_runs(run_id, strategy, question_id, answer, judge, tokens,
   cost, latency_ms)`
 - `embeddings(...)` 暂不建表：M2 检索定稿为 KV 时间衰减，向量是后续增强通道。
@@ -199,8 +201,8 @@ data-assistant/
 │   └── architecture.md               ✅ 本架构文档
 ├── src/personal_data_assistant/
 │   ├── .gitkeep                      ✅ M0 占位（保留兼容 M0 契约）
-│   ├── config.py                     ✅ M1 配置与默认值（M2 增加记忆默认值）
-│   ├── app.py                          ✅ M2 装配入口（记忆外层组件 + 核心循环）
+│   ├── config.py                     ✅ M1 配置与默认值（M2 记忆 + M3 问数默认值）
+│   ├── app.py                          ✅ M2/M3 装配入口（记忆外层 + sql_query + 习惯别名）
 │   ├── llm/
 │   │   ├── client.py                  ✅ M1 DeepSeek 客户端
 │   │   └── prompts.py                 ✅ M1 提示词模板
@@ -209,7 +211,7 @@ data-assistant/
 │   ├── tools/
 │   │   ├── base.py                    ✅ M1 工具协议
 │   │   ├── registry.py                ✅ M1 注册表
-│   │   └── sql_tools.py                 M3 问数工具
+│   │   └── sql_tools.py               ✅ M3 sql_query 工具
 │   ├── memory/
 │   │   ├── models.py                   ✅ M2 共享数据模型与策略枚举
 │   │   ├── window.py                   ✅ M2 滑动窗口
@@ -217,11 +219,14 @@ data-assistant/
 │   │   ├── long_term.py                ✅ M2 SQLite 持久化 + KV 时间衰减
 │   │   └── retriever.py                ✅ M2 策略编排/上下文拼装/多策略重放
 │   ├── data/
-│   │   ├── sqlite.py                    M3 只读 SQL 执行
-│   │   ├── schema.py                    M3 表结构探查
-│   │   └── ask.py                       M3 问数编排
+│   │   ├── __init__.py                ✅ M3 包出口
+│   │   ├── sqlite.py                  ✅ M3 只读 SQL 执行
+│   │   ├── schema.py                  ✅ M3 表结构探查
+│   │   ├── ask.py                     ✅ M3 问数编排 + 评测埋点
+│   │   └── demo.py                    ✅ M3 中文演示数据生成器
 │   ├── profile/
-│   │   └── habits.py                    M3 习惯记忆
+│   │   ├── __init__.py                ✅ M3 包出口
+│   │   └── habits.py                  ✅ M3 习惯别名（复用 KV 记忆）
 │   └── api/
 │       ├── main.py                      M4 FastAPI 入口
 │       ├── routes.py                    M4 接口路由
@@ -240,13 +245,18 @@ data-assistant/
 │   ├── test_memory_retriever.py        ✅ M2 策略编排与重放
 │   ├── test_app.py                     ✅ M2 外层装配
 │   ├── test_integration_memory.py      ✅ M2 真实 API 冒烟（默认跳过）
-│   ├── test_data_ask.py                 M3（固定 SQLite 测试库）
-│   ├── test_profile_habits.py           M3
+│   ├── test_data_sqlite.py            ✅ M3 只读/白名单/超时
+│   ├── test_data_schema.py            ✅ M3 结构探查/脱敏/样例
+│   ├── test_data_ask.py               ✅ M3 固定 SQLite 测试库 + fake 修正
+│   ├── test_data_demo.py              ✅ M3 演示数据契约
+│   ├── test_sql_tools.py              ✅ M3 工具注册 + core 接缝
+│   ├── test_profile_habits.py         ✅ M3 习惯别名 + app 改写接缝
+│   ├── test_integration_sql.py        ✅ M3 真实 API 冒烟（默认跳过）
 │   ├── test_api.py                      M4（TestClient）
 │   └── test_evals.py                    M5
 ├── data/
 │   ├── .gitkeep                      ✅ 数据目录占位
-│   └── README.md                      ✅ M2 数据文件说明
+│   └── README.md                      ✅ M2/M3 数据文件说明
 └── evals/
     ├── .gitkeep                      ✅ 评测目录占位
     ├── questions/memory_50.json         M5 50 道记忆问答
@@ -290,17 +300,24 @@ data-assistant/
 - 核心循环零改动：`MemoryManager.augment_question()` 把上下文拼进用户问题，
   再交给 M1 `run_tool_loop`；`complete/stream_chat` 鸭子协议保持不变。
 
-### 5.3 M3 智能问数
+### 5.3 M3 智能问数（已实现）
 
-- 先给模型紧凑 schema（表名、字段、类型、去标识的样例值），再让它写 SQL，
-  不把整库内容塞进提示词。
-- SQL 安全：只读连接；只允许 `SELECT`/`WITH` 开头；禁止多语句；默认 `LIMIT` 保护；
-  执行带超时。
-- 执行失败把“SQL + 错误信息”回填，模型修正后再执行；修正轮数用尽则对用户
-  说明“这个问题我没查到，原因和试过的 SQL 如下”。
-- 答案必须包含：结果数字、统计口径（用了哪张表哪个字段）、SQL 原文，便于用户核对。
-- 习惯学习：当用户纠正“我说的饭钱就是餐饮”，写入 `user_aliases` 并加权重；
-  下次问数前用最高权重别名改写问题。
+- 先给模型紧凑 schema（表名、字段、类型、主键、每列最多 3 个脱敏样例值），
+  再让它写 SQL，不把整库内容塞进提示词。schema 以紧凑 JSON 渲染，邮箱/手机号
+  先脱敏，金额/日期/时长原样保留。
+- SQL 安全三层闸：①只允许 `SELECT`/`WITH` 开头且单语句（状态机识别字符串/注释里
+  的分号）；②用户库用 SQLite URI `mode=ro` 打开并 `PRAGMA query_only=ON`；
+  ③执行超时（progress handler，默认 5s）+ 返回行数上限（默认 100 行）。
+- 执行失败把“SQL + 错误信息”回填，模型修正后再执行，最多修正 3 次；修正轮数用尽
+  则返回“原因 + 试过的 SQL 列表”，绝不假装成功。
+- 答案必须包含：结果数字、统计口径（用了哪张表哪个字段）、SQL 原文；解释模型失败
+  时用确定性中文格式化兜底（数字、口径、SQL 都在）。
+- 评测埋点已就位：`AskResult` 记录 `first_attempt_success` / `fix_success` /
+  `total_fix_rounds` / `model_calls` / token usage / `attempts_log`；
+  成功率与平均修正轮数等聚合计算留给 M5。
+- 习惯学习（加分项）：`HabitAliasStore` 复用 M2 KV 记忆，key=`sql_alias:<用户说法>`、
+  value=标准说法、category=`sql_alias`、weight=置信度；改写时“长说法优先、高权重
+  优先”，`app.ask` 先改写再注入记忆上下文，`learn_alias` 供后续纠正学习。
 
 ### 5.4 M4 网页
 
@@ -328,7 +345,8 @@ data-assistant/
 
 配置默认值：HTTP 连接超时 10s、读取超时 30s、模型重试 2 次、工具循环 6 轮、
 SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay_lambda=0.05、
-默认策略 full、默认库 `data/pda.db`。全部集中在 `config.py`，评测可覆盖。
+默认策略 full、默认库 `data/pda.db`；问数默认库 `data/user_tables.db`、SQL 执行
+超时 5s、返回行数上限 100、schema 样例 3 行。全部集中在 `config.py`，评测可覆盖。
 
 ---
 
@@ -376,7 +394,8 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
 1. M0：骨架 + 架构 + 契约测试（当前）。
 2. M1：先写 `test_core_loop.py`（fake 模型脚本）→ 实现 `config/llm/core/tools`。
 3. M2：先写窗口/摘要/持久化/策略重放的样例库测试 → 实现 `memory` 各模块与 `app` 外层装配。
-4. M3：先写固定 SQLite 测试库的问数测试 → 实现 `data`、`profile`。
+4. M3：先写固定 SQLite 测试库的问数测试 → 实现 `data`、`tools.sql_tools`、
+   `profile`（已完成；红阶段 6 个 collection error，终态 159 passed, 5 deselected）。
 5. M4：先写 FastAPI TestClient 测试 → 实现路由与极简页面。
 6. M5：先写题集校验与判分测试 → 跑评测 → 写完整 README。
 
@@ -400,6 +419,9 @@ SQL 修正 3 轮；记忆窗口 20 条 / 8k token、长期记忆 top-k=8、decay
 - ADR-5：评测数据与真实数据物理隔离。理由：评测可重复，不污染个人记忆。
 - ADR-6：摘要层级定稿为会话级 → 日级 → 周级，不再使用 L0/L1/L2 说法；
   记忆作为核心循环的外层组件通过 `augment_question` 接入，不改 M1 循环协议。
+- ADR-7：问数别名不建独立 `user_aliases` 表，先复用 `kv_memories`
+  （key=`sql_alias:*`、category=`sql_alias`、weight 当置信度）。理由：M3 别名
+  数量少、查询简单，KV 已具备持久化与检索能力；未来画像字段多了再拆表，接口不变。
 
 ---
 

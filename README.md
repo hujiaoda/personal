@@ -20,7 +20,7 @@
 | M0 | 仓库骨架 + 架构设计文档 | 已完成 |
 | M1 | 核心循环：模型调用 → 工具执行 → 结果回填 → 循环 | 已完成 |
 | M2 | 记忆系统：滑动窗口 + 会话/日/周摘要 + SQLite + KV 时间衰减检索 + 四策略重放 | 已完成 |
-| M3 | 智能问数：大白话 → 查表结构 → 写 SQL → 执行 → 自动修正 → 解释 | 未开始 |
+| M3 | 智能问数：大白话 → 查表结构 → 写 SQL → 只读执行 → 自动修正 → 中文解释 | 已完成 |
 | M4 | 网页：FastAPI 接口 + 极简页面 | 未开始 |
 | M5 | 评测：50 道记忆问答 + 四种记忆策略对比 + SQL 准确率 + 完整 README | 未开始 |
 
@@ -35,7 +35,9 @@ data-assistant/
 │   ├── llm/               # M1 手写 httpx 客户端 + JSON 动作协议提示词
 │   ├── core/loop.py       # M1 工具调用循环状态机
 │   ├── memory/            # M2 窗口 / 分层摘要 / SQLite / 时间衰减检索
-│   └── tools/             # M1 工具协议 + 注册表
+│   ├── data/              # M3 只读 SQL / schema 探查 / 问数编排 / 演示数据
+│   ├── profile/           # M3 习惯别名（复用 KV 长期记忆）
+│   └── tools/             # M1 工具协议 + 注册表 + M3 sql_query
 ├── tests/                 # pytest 测试（先写测试，再写实现）
 ├── data/                  # SQLite 系统库、样例数据
 ├── evals/                 # 评测题集与评测脚本（M5）
@@ -51,6 +53,8 @@ cd /home/hujiao/projects/data-assistant
 uv venv --python 3.10 .venv
 uv pip install --python .venv/bin/python -e '.[dev]'
 cp .env.example .env   # 填入 DEEPSEEK_API_KEY
+# 生成本地问数演示库（data/user_tables.db）：
+PYTHONPATH= .venv/bin/python scripts/seed_user_tables.py
 # 本机有 ROS 注入 PYTHONPATH，测试必须清空它，否则 pytest 会加载 ROS 插件报错：
 PYTHONPATH= .venv/bin/python -m pytest
 ```
@@ -85,6 +89,21 @@ M2 的目标是先把「记忆入库 → 分层压缩 → 可检索」的整条�
 离线可测、结果可解释，个人记忆库几千条以内完全够用。语义向量（embedding +
 余弦）作为后续增强通道，替换时只动 `MemoryDatabase.search_memories` 内部，
 返回的 KVMemory 形状不变。不引入 NumPy/向量库，也少一个平台依赖和降级分支。
+
+
+### 为什么 M3 的 SQL 安全是“三层闸”，而不是只靠提示词
+
+Text-to-SQL 最怕模型幻觉出一条 `DELETE`。本项目在 `data/sqlite.py` 做了三层独立防线：
+
+1. **白名单**：去掉前导注释后，第一条（也是唯一一条）语句必须以 `SELECT`/`WITH`
+   开头；多语句、`INSERT/UPDATE/DELETE/PRAGMA` 全部在进 SQLite 前拒绝。
+2. **只读连接**：用 SQLite URI `mode=ro` 打开用户库，并额外 `PRAGMA query_only=ON`。
+   即使白名单漏掉 `WITH ... DELETE` 这类“CTE 前缀 + 写操作”的形态，也只读挡回。
+3. **执行超时 + 行数上限**：progress handler 到点中断长查询，`fetchmany(max_rows+1)`
+   限制回传内存，不让一条笛卡尔积查询拖死进程。
+
+错误修正子循环不藏魔法：执行失败后把「失败 SQL + 真实错误」作为 user 消息回填给
+模型，最多重写 3 次；修正次数耗尽就返回“原因 + 试过的 SQL”，绝不假装成功。
 
 ### 为什么手写 httpx 而不是用 openai SDK
 
